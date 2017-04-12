@@ -49,7 +49,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.v13.app.FragmentCompat;
 import android.support.v4.content.ContextCompat;
@@ -66,8 +65,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -77,7 +74,7 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-import static com.melonteam.objtrack.MainActivity.getScreenWidth;
+import static com.melonteam.objtrack.CameraActivity.getScreenWidth;
 
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class Camera2BasicFragment extends Fragment

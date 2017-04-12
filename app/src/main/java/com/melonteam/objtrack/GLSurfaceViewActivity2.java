@@ -17,7 +17,7 @@ public class GLSurfaceViewActivity2 extends Activity {
     private MyGLSurfaceView2 mView;
     private PowerManager.WakeLock mWL;
 
-    public static final int ScreentWidth = MainActivity.getScreenHeight();
+    public static final int ScreentWidth = CameraActivity.getScreenHeight();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
