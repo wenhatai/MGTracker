@@ -6,6 +6,10 @@ package com.melonteam.objtrack;
 
 public class ObjTrack {
 
+    public static final int TYPE_NV21 = 0;
+    public static final int TYPE_RGB = 1;
+    public static final int TYPE_RGBA = 2;
+
     public static void init() {
         try {
             System.loadLibrary("object_track");
@@ -20,9 +24,9 @@ public class ObjTrack {
         public void onVideoFrame(byte[] videoData,int[] size);
     }
 
-    public static native void openTrack(byte[] yuvData, int x, int y, int w, int h, int cameraWidth, int cameraHeight);
+    public static native void openTrack(byte[] yuvData,int dataType, int x, int y, int w, int h, int cameraWidth, int cameraHeight);
 
-    public static native int[] processTrack(byte[] yuvData, int cameraWidth, int cameraHeight);
+    public static native int[] processTrack(byte[] yuvData, int dataType,int cameraWidth, int cameraHeight);
 
     public static native void readFile(String filePath);
 

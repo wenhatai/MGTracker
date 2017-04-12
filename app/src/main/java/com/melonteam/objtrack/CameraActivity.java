@@ -151,54 +151,100 @@ public class CameraActivity extends AppCompatActivity implements TextureView.Sur
         });
     }
 
-    byte[] currentData;
+    byte[] mCurrentData;
     Handler mHandler = new Handler(Looper.getMainLooper());
 
-    Thread trackThread = new Thread(){
+    class TrackThread extends Thread{
         @Override
         public void run() {
             android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
-            while (currentData != null){
-                long startTimeStamp = System.currentTimeMillis();
-                mTrackFrame++;
-                if (mDrawView.mDrawRectF == null) {
+            long startTimeStamp = System.currentTimeMillis();
+            mTrackFrame++;
+            if (mDrawView.mDrawRectF == null || mCurrentData == null) {
+                return;
+            }
+            synchronized (mDrawView.mDrawRectF) {
+                if(!mTextureView.isAvailable()){
                     return;
                 }
-                synchronized (mDrawView.mDrawRectF) {
-                    if(!mTextureView.isAvailable()){
-                        return;
+                float rateY = mDrawView.getWidth() * 1.0f / mCameraHeight;
+                float rateX = mDrawView.getHeight() * 1.0f / mCameraWidth;
+                RectF rectF = new RectF(mDrawView.mDrawRectF);
+                rectF.left = rectF.left / rateX;
+                rectF.right = rectF.right / rateX;
+                rectF.top = rectF.top / rateY;
+                rectF.bottom = rectF.bottom / rateY;
+                if (!isInitTrack) {
+                    ObjTrack.openTrack(mCurrentData, ObjTrack.TYPE_NV21,(int) rectF.left, (int) rectF.top, (int) rectF.width(), (int) rectF.height(), mCameraWidth, mCameraHeight);
+                    isInitTrack = true;
+                } else {
+                    int[] cmtData = ObjTrack.processTrack(mCurrentData,ObjTrack.TYPE_NV21,mCameraWidth, mCameraHeight);
+                    if(cmtData != null && mDrawView.mDrawRectF != null){
+                        mDrawView.mDrawRectF.left = cmtData[0] * rateX;
+                        mDrawView.mDrawRectF.top = cmtData[1] * rateY;
+                        mDrawView.mDrawRectF.right = cmtData[6] * rateX;
+                        mDrawView.mDrawRectF.bottom = cmtData[7] * rateY;
+                        mDrawView.postInvalidate();
                     }
-                    float rateY = mDrawView.getWidth() * 1.0f / mCameraHeight;
-                    float rateX = mDrawView.getHeight() * 1.0f / mCameraWidth;
-                    RectF rectF = new RectF(mDrawView.mDrawRectF);
-                    rectF.left = rectF.left / rateX;
-                    rectF.right = rectF.right / rateX;
-                    rectF.top = rectF.top / rateY;
-                    rectF.bottom = rectF.bottom / rateY;
-                    if (!isInitTrack) {
-                        ObjTrack.openTrack(currentData, (int) rectF.left, (int) rectF.top, (int) rectF.width(), (int) rectF.height(), mCameraWidth, mCameraHeight);
-                        isInitTrack = true;
-                    } else {
-                        int[] cmtData = ObjTrack.processTrack(currentData,mCameraWidth, mCameraHeight);
-                        if(cmtData != null && mDrawView.mDrawRectF != null){
-                            mDrawView.mDrawRectF.left = cmtData[0] * rateX;
-                            mDrawView.mDrawRectF.top = cmtData[1] * rateY;
-                            mDrawView.mDrawRectF.right = cmtData[6] * rateX;
-                            mDrawView.mDrawRectF.bottom = cmtData[7] * rateY;
-                            mDrawView.postInvalidate();
-                        }
-                    }
-                }
-                mTrackTimeStamp += (System.currentTimeMillis() - startTimeStamp);
-                if (mTrackFrame >= 30) {
-                    mTrackFrame = 0;
-                    mTrackFps = (int) (30 * 1000 / mTrackTimeStamp);
-                    mTrackTimeStamp = 0;
-                    updateFps();
                 }
             }
+            mTrackTimeStamp += (System.currentTimeMillis() - startTimeStamp);
+            if (mTrackFrame >= 30) {
+                mTrackFrame = 0;
+                mTrackFps = (int) (30 * 1000 / mTrackTimeStamp);
+                mTrackTimeStamp = 0;
+                updateFps();
+            }
         }
-    };
+    }
+
+    TrackThread mTrackThread;
+
+//    Thread trackThread = new Thread(){
+//        @Override
+//        public void run() {
+//            android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
+//            while (currentData != null){
+//                long startTimeStamp = System.currentTimeMillis();
+//                mTrackFrame++;
+//                if (mDrawView.mDrawRectF == null) {
+//                    return;
+//                }
+//                synchronized (mDrawView.mDrawRectF) {
+//                    if(!mTextureView.isAvailable()){
+//                        return;
+//                    }
+//                    float rateY = mDrawView.getWidth() * 1.0f / mCameraHeight;
+//                    float rateX = mDrawView.getHeight() * 1.0f / mCameraWidth;
+//                    RectF rectF = new RectF(mDrawView.mDrawRectF);
+//                    rectF.left = rectF.left / rateX;
+//                    rectF.right = rectF.right / rateX;
+//                    rectF.top = rectF.top / rateY;
+//                    rectF.bottom = rectF.bottom / rateY;
+//                    if (!isInitTrack) {
+//                        ObjTrack.openTrack(currentData, ObjTrack.TYPE_NV21,(int) rectF.left, (int) rectF.top, (int) rectF.width(), (int) rectF.height(), mCameraWidth, mCameraHeight);
+//                        isInitTrack = true;
+//                    } else {
+//                        int[] cmtData = ObjTrack.processTrack(currentData,ObjTrack.TYPE_NV21,mCameraWidth, mCameraHeight);
+//                        if(cmtData != null && mDrawView.mDrawRectF != null){
+//                            mDrawView.mDrawRectF.left = cmtData[0] * rateX;
+//                            mDrawView.mDrawRectF.top = cmtData[1] * rateY;
+//                            mDrawView.mDrawRectF.right = cmtData[6] * rateX;
+//                            mDrawView.mDrawRectF.bottom = cmtData[7] * rateY;
+//                            mDrawView.postInvalidate();
+//                        }
+//                    }
+//                }
+//                mTrackTimeStamp += (System.currentTimeMillis() - startTimeStamp);
+//                if (mTrackFrame >= 30) {
+//                    mTrackFrame = 0;
+//                    mTrackFps = (int) (30 * 1000 / mTrackTimeStamp);
+//                    mTrackTimeStamp = 0;
+//                    updateFps();
+//                }
+//            }
+//        }
+//    };
 
     @Override
     public void onPreviewFrame(byte[] data, Camera camera) {
@@ -206,9 +252,10 @@ public class CameraActivity extends AppCompatActivity implements TextureView.Sur
             if (mDrawView.mDrawRectF == null) {
                 return;
             }
-            currentData = data;
-            if(!trackThread.isAlive()){
-                trackThread.start();
+            mCurrentData = data;
+            if(mTrackThread == null || !mTrackThread.isAlive()){
+                mTrackThread = new TrackThread();
+                mTrackThread.start();
             }
         }finally {
             if(mSupportUserBuffer){

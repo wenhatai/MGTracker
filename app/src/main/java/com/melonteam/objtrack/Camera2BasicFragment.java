@@ -1032,10 +1032,10 @@ public class Camera2BasicFragment extends Fragment
                     rectF.top = rectF.top / rateY;
                     rectF.bottom = rectF.bottom / rateY;
                     if (!mFragment.isInitTrack) {
-                        ObjTrack.openTrack(data, (int) rectF.left, (int) rectF.top, (int) rectF.width(), (int) rectF.height(), mFragment.mCameraWidth, mFragment.mCameraHeight);
+                        ObjTrack.openTrack(data,ObjTrack.TYPE_NV21, (int) rectF.left, (int) rectF.top, (int) rectF.width(), (int) rectF.height(), mFragment.mCameraWidth, mFragment.mCameraHeight);
                         mFragment.isInitTrack = true;
                     } else {
-                        int[] cmtData = ObjTrack.processTrack(data, mFragment.mCameraWidth, mFragment.mCameraHeight);
+                        int[] cmtData = ObjTrack.processTrack(data, ObjTrack.TYPE_NV21,mFragment.mCameraWidth, mFragment.mCameraHeight);
                         if (cmtData != null) {
                             mFragment.mDrawView.mDrawRectF.left = cmtData[0] * rateX;
                             mFragment.mDrawView.mDrawRectF.top = cmtData[1] * rateY;

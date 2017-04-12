@@ -320,10 +320,10 @@ public class MyGLSurfaceView2 extends GLSurfaceView {
                 rectF.top = rectF.top / rateY;
                 rectF.bottom = rectF.bottom / rateY;
                 if (!isInitTrack) {
-                    ObjTrack.openTrack(data, (int) rectF.left, (int) rectF.top, (int) rectF.width(), (int) rectF.height(), mCameraWidth, mCameraHeight);
+                    ObjTrack.openTrack(data, ObjTrack.TYPE_NV21,(int) rectF.left, (int) rectF.top, (int) rectF.width(), (int) rectF.height(), mCameraWidth, mCameraHeight);
                     isInitTrack = true;
                 } else {
-                    int[] cmtData = ObjTrack.processTrack(data,mCameraWidth, mCameraHeight);
+                    int[] cmtData = ObjTrack.processTrack(data,ObjTrack.TYPE_NV21,mCameraWidth, mCameraHeight);
                     if(cmtData != null){
                         mDrawView.mDrawRectF.left = cmtData[0] * rateX;
                         mDrawView.mDrawRectF.top = cmtData[1] * rateY;
