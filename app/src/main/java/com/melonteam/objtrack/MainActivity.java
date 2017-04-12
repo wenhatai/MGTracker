@@ -180,7 +180,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                         isInitTrack = true;
                     } else {
                         int[] cmtData = ObjTrack.processTrack(currentData,mCameraWidth, mCameraHeight);
-                        if(cmtData != null){
+                        if(cmtData != null && mDrawView.mDrawRectF != null){
                             mDrawView.mDrawRectF.left = cmtData[0] * rateX;
                             mDrawView.mDrawRectF.top = cmtData[1] * rateY;
                             mDrawView.mDrawRectF.right = cmtData[6] * rateX;

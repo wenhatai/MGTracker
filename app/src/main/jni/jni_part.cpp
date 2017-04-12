@@ -3,6 +3,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/features2d/features2d.hpp>
 #include "CMT/MGCMT.h"
+#include "LibCMT.h"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -13,6 +14,7 @@
 #include <android/log.h>
 
 #define  LOG_TAG    "testjni"
+#define  LIBCMT  true
 #define  ALOG(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
 
 using namespace std;
@@ -26,9 +28,9 @@ extern "C" {
 
 bool CMTinitiated=false;
 CMT * libCMT= new CMT();
+// LibCMT * g_cmt = new LibCMT();
 int CmtWidth = 400;
 int CmtHeight = 300;
-
 
 uint8_t *g_Frame = NULL;
 int g_FrameSize;
@@ -38,8 +40,11 @@ jbyteArray g_ByteArray = NULL;
 jintArray g_SizeArray = NULL;
 bool g_StopVideo = false;
 bool g_PauseVideo = true;
-bool g_StartVideoTrack = false;
 Rect g_VideoRect;
+bool g_ProcessEnd = false;
+bool g_initTrackRect = false;
+
+
 // from android samples
 /* return current time in milliseconds */
 static double now_ms(void) {
@@ -50,6 +55,7 @@ static double now_ms(void) {
 
 void allocateFrameSize(JNIEnv *env,int size){
         if(g_FrameSize >= size) {
+                g_FrameSize = size;
                 return;
         }
         if(g_Frame != NULL) {
@@ -90,42 +96,87 @@ JNIEXPORT void JNICALL Java_com_melonteam_objtrack_ObjTrack_setVideoTrack(JNIEnv
         g_VideoRect = Rect(p1,p2);
         pthread_mutex_unlock(&mutex);
         CMTinitiated = false;
+        g_initTrackRect = true;
 }
 
 void *processVideoTrack(void *arg){
-  while(g_Frame != NULL && g_Size[0] != 0 && g_Size[1] != 0){
-    if(g_StopVideo){
-      break;
-    }
-    float rateX = CmtWidth*1.0f/g_Size[0];
-    float rateY = CmtHeight*1.0f/g_Size[1];
-    Mat img = Mat(g_Size[1],g_Size[0],CV_8UC3,(void*)g_Frame);
-    Mat rgbMat,tmpMat;
-    cv::cvtColor(img, tmpMat, CV_RGB2RGBA);
-    cv::resize(tmpMat,rgbMat,cv::Size(CmtWidth,CmtHeight));
-    if(!CMTinitiated){
-        pthread_mutex_lock(&mutex);
-        cv::Rect rect(g_VideoRect.x*rateX,g_VideoRect.y*rateY,g_VideoRect.width*rateX,g_VideoRect.y*rateY);
-        pthread_mutex_unlock(&mutex);
-        // ALOG("x:%d,y:%d,width:%d,height:%d,imagewidth:%d,imageHeight:%d",rect.x,rect.y,rect.width,rect.height,g_Size[0],g_Size[1]);
-        libCMT->initialize(rgbMat,rect);
-        CMTinitiated=true;
-    }else{
-      libCMT->processFrame(rgbMat);
-      RotatedRect resultRect;
-      if ( libCMT->_isMatched) {
-              resultRect = libCMT->_outRot;
-      } else {
-              resultRect = RotatedRect(Point2f(0,0),Size2f(0,0),0);
-      }
-      pthread_mutex_lock(&mutex);
-      g_VideoRect.x = resultRect.center.x - resultRect.size.width/2;
-      g_VideoRect.y = resultRect.center.y - resultRect.size.height/2;
-      g_VideoRect.width = resultRect.size.width;
-      g_VideoRect.height = resultRect.size.height;
-      pthread_mutex_unlock(&mutex);
-    }
-  }
+        // while(g_Frame != NULL && g_Size[0] != 0 && g_Size[1] != 0) {
+        //         if(g_StopVideo) {
+        //                 break;
+        //         }
+
+                float rateX = 1.0f;
+                float rateY = 1.0f;
+                int resizeWidth = g_Size[0];
+                int resizeHeight = g_Size[1];
+                if(g_Size[0] > 600 || g_Size[1] > 600){
+                  rateX = 400*1.0f/g_Size[0];
+                  rateY = 400*1.0f/g_Size[1];
+                  if(rateX < rateY){
+                    resizeWidth = 400;
+                    resizeHeight = (int)(g_Size[1]*rateX);
+                    rateY = rateX;
+                  }else{
+                    resizeHeight = 400;
+                    resizeWidth = (int)(g_Size[0]*rateY);
+                    rateX = rateY;
+                  }
+                }
+                Mat img = Mat(g_Size[1],g_Size[0],CV_8UC3,(void*)g_Frame);
+                Mat resultMat,tmpMat;
+                #ifdef LIBCMT
+                if(rateX == 1.0f && rateY == 1.0f){
+                  cv::cvtColor(img,resultMat,CV_RGB2RGBA);
+                }else{
+                  cv::cvtColor(img, tmpMat, CV_RGB2RGBA);
+                  cv::resize(tmpMat,resultMat,cv::Size(resizeWidth,resizeHeight));
+                }
+                #else
+                if(rateX == 1.0f&& rateY == 1.0f){
+                  cv::cvtColor(img,resultMat,CV_RGB2GRAY);
+                }else{
+                  cv::cvtColor(img, tmpMat, CV_RGB2GRAY);
+                  cv::resize(tmpMat,resultMat,cv::Size(resizeWidth,resizeHeight));
+                }
+                #endif
+                if(!CMTinitiated) {
+                        pthread_mutex_lock(&mutex);
+                        cv::Rect rect(g_VideoRect.x*rateX,g_VideoRect.y*rateY,g_VideoRect.width*rateX,g_VideoRect.y*rateY);
+                        pthread_mutex_unlock(&mutex);
+                        // ALOG("x:%d,y:%d,width:%d,height:%d,imagewidth:%d,imageHeight:%d",rect.x,rect.y,rect.width,rect.height,g_Size[0],g_Size[1]);
+                #ifdef LIBCMT
+                         libCMT->initialize(resultMat,rect);
+                        CMTinitiated=true;
+                #else
+                        CMTinitiated = g_cmt->initialise(resultMat,Point2f(rect.x,rect.y),Point2f(rect.x+rect.width,rect.y+rect.height));
+                #endif
+                }else{
+                #ifdef LIBCMT
+                        RotatedRect resultRect;
+                        libCMT->processFrame(resultMat);
+                        if ( libCMT->_isMatched) {
+                                resultRect = libCMT->_outRot;
+                        } else {
+                                resultRect = RotatedRect(Point2f(0,0),Size2f(0,0),0);
+                        }
+                        pthread_mutex_lock(&mutex);
+                        g_VideoRect.x = resultRect.center.x - resultRect.size.width/2;
+                        g_VideoRect.y = resultRect.center.y - resultRect.size.height/2;
+                        g_VideoRect.width = resultRect.size.width;
+                        g_VideoRect.height = resultRect.size.height;
+                        pthread_mutex_unlock(&mutex);
+               #else
+                        g_cmt->processFrame(resultMat);
+                        pthread_mutex_lock(&mutex);
+                        g_VideoRect.x = g_cmt->topLeft.x;
+                        g_VideoRect.y = g_cmt->topLeft.y;
+                        g_VideoRect.width = g_cmt->bottomRight.x-g_cmt->topLeft.x;
+                        g_VideoRect.height = g_cmt->bottomRight.y-g_cmt->topLeft.y;
+                        pthread_mutex_unlock(&mutex);
+              #endif
+                }
+                g_ProcessEnd = true;
+        // }
 }
 
 JNIEXPORT jint JNICALL Java_com_melonteam_objtrack_ObjTrack_readFile(JNIEnv *env,jobject obj,jstring filePath){
@@ -216,8 +267,9 @@ JNIEXPORT jint JNICALL Java_com_melonteam_objtrack_ObjTrack_readFile(JNIEnv *env
         g_ByteArray = NULL;
         g_SizeArray = NULL;
         g_VideoRect = Rect(0,0,0,0);
-        g_StartVideoTrack = false;
+        g_ProcessEnd = true;
         CMTinitiated = false;
+        g_initTrackRect = false;
         while(av_read_frame(pFormatCtx, &packet)>=0) {
                 if(g_StopVideo) {
                         break;
@@ -264,10 +316,12 @@ JNIEXPORT jint JNICALL Java_com_melonteam_objtrack_ObjTrack_readFile(JNIEnv *env
                                                 env->CallStaticVoidMethod(clazz,videoCallBackMethod,g_ByteArray,g_SizeArray);
                                         }
                                 }
-                                if(g_VideoRect.width != 0 && g_VideoRect.height != 0 &&!g_StartVideoTrack){
-                                  pthread_t tid;
-                                  pthread_create(&tid,NULL,processVideoTrack,(void *)NULL);
-                                  g_StartVideoTrack = true;
+                                if(g_Size[0] != 0 && g_Size[1] != 0 && g_ProcessEnd &&g_initTrackRect) {
+                                        pthread_t tid;
+                                        pthread_create(&tid,NULL,processVideoTrack,(void *)NULL);
+                                        g_ProcessEnd = false;
+                                }else{
+                                  ALOG("lost frame:%d",i);
                                 }
                                 // memcpy(g_Frame+length, pFrame->data[1], length/4);
                                 // memcpy(g_Frame+length+length/4, pFrame->data[2], length/4);
@@ -275,20 +329,24 @@ JNIEXPORT jint JNICALL Java_com_melonteam_objtrack_ObjTrack_readFile(JNIEnv *env
                                 // fwrite(pFrame->data[0],(pCodecCtx->width)*(pCodecCtx->height),1,output);
                                 // fwrite(pFrame->data[1],(pCodecCtx->width)*(pCodecCtx->height)/4,1,output);
                                 // fwrite(pFrame->data[2],(pCodecCtx->width)*(pCodecCtx->height)/4,1,output);
-                        }
-                        while(g_PauseVideo) {
-                                if(g_StopVideo) {
-                                        break;
+                                int sleepTime = (int)(frame_time - (now_ms() - start_time)*1000);
+                                if(sleepTime > 0) {
+                                        usleep(sleepTime);
                                 }
-                                usleep(200);
+                                while(g_PauseVideo) {
+                                        if(g_StopVideo) {
+                                                break;
+                                        }
+                                        usleep(200);
+                                }
                         }
-                        int sleepTime = (int)(frame_time - (now_ms() - start_time)*1000);
-                        if(sleepTime > 0) {
-                                usleep(sleepTime);
-                        }
+
                 }
 
                 av_free_packet(&packet);
+                if(g_StopVideo){
+                    break;
+                }
         }
         g_StopVideo = true;
         if(clazz != NULL) {
@@ -318,19 +376,23 @@ JNIEXPORT jbyteArray JNICALL Java_com_melonteam_objtrack_ObjTrack_openTrack(JNIE
         char* buf = new char[len];
         env->GetByteArrayRegion (yuvData, 0, len, reinterpret_cast<jbyte*>(buf));
         Mat im_yuv = Mat(imageHeight+imageHeight/2,imageWidth,CV_8UC1,buf);
-        Mat img,rgbMat,grayMat;
+        Mat img,grayMat;
         cv::cvtColor(im_yuv, img, CV_YUV420sp2GRAY);
         cv::resize(img,grayMat,cv::Size(CmtWidth,CmtHeight));
-        cv::cvtColor(grayMat,rgbMat,CV_GRAY2RGBA);
-
         float rateX = CmtWidth*1.0f/imageWidth;
         float rateY = CmtHeight*1.0f/imageHeight;
         Point p1(x*rateX,y*rateY);
         Point p2((x+width)*rateX,(y+height)*rateY);
         Rect rect = Rect(p1,p2);
-
+        #ifdef LIBCMT
+        Mat rgbMat;
+        cv::cvtColor(grayMat,rgbMat,CV_GRAY2RGBA);
         libCMT->initialize(rgbMat,rect);
         CMTinitiated=true;
+        #else
+        CMTinitiated = g_cmt->initialise(grayMat,p1,p2);
+        #endif
+
 }
 
 JNIEXPORT jintArray JNICALL Java_com_melonteam_objtrack_ObjTrack_getTrackResult(JNIEnv *env,jobject){
@@ -339,24 +401,32 @@ JNIEXPORT jintArray JNICALL Java_com_melonteam_objtrack_ObjTrack_getTrackResult(
         jintArray result = env->NewIntArray(8);
         jint fill[8];
         Rect rect = g_VideoRect;
-        {
-                float rateX = g_Size[0]*1.0f/CmtWidth;
-                float rateY = g_Size[1]*1.0f/CmtHeight;
-                int width = rect.width*rateX;
-                int height = rect.height*rateY;
-                fill[0] = (int)rect.x*rateX;
-                fill[1] = (int)rect.y*rateY;
-                fill[2] = (int)rect.x*rateX+width;
-                fill[3] = (int)rect.y*rateY;
-                fill[4] = (int)rect.x*rateX;
-                fill[5] = (int)rect.y*rateY+height;
-                fill[6] = (int)rect.x*rateX+width;
-                fill[7] = (int)rect.y*rateY+height;
-                env->SetIntArrayRegion(result, 0, 8, fill);
-                return result;
+        // float rateX = g_Size[0]*1.0f/CmtWidth;
+        // float rateY = g_Size[1]*1.0f/CmtHeight;
+        float rateX = 1.0f;
+        float rateY = 1.0f;
+        if(g_Size[0] > 600 || g_Size[1] > 600){
+          rateX = g_Size[0]*1.0f/400;
+          rateY = g_Size[1]*1.0f/400;
+          if(rateX > rateY){
+            rateY = rateX;
+          }else{
+            rateX = rateY;
+          }
         }
+        int width = rect.width*rateX;
+        int height = rect.height*rateY;
+        fill[0] = (int)rect.x*rateX;
+        fill[1] = (int)rect.y*rateY;
+        fill[2] = (int)rect.x*rateX+width;
+        fill[3] = (int)rect.y*rateY;
+        fill[4] = (int)rect.x*rateX;
+        fill[5] = (int)rect.y*rateY+height;
+        fill[6] = (int)rect.x*rateX+width;
+        fill[7] = (int)rect.y*rateY+height;
+        env->SetIntArrayRegion(result, 0, 8, fill);
+        return result;
 
-        return NULL;
 }
 
 JNIEXPORT jintArray JNICALL Java_com_melonteam_objtrack_ObjTrack_processTrack(JNIEnv *env, jobject,jbyteArray yuvData,jint imageWidth,jint imageHeight)
@@ -366,15 +436,16 @@ JNIEXPORT jintArray JNICALL Java_com_melonteam_objtrack_ObjTrack_processTrack(JN
         int len = env->GetArrayLength (yuvData);
         char* buf = new char[len];
         jintArray result = env->NewIntArray(8);
-        RotatedRect resultRect;
-
+        Rect rect;
         env->GetByteArrayRegion (yuvData, 0, len, reinterpret_cast<jbyte*>(buf));
         Mat im_yuv = Mat(imageHeight+imageHeight/2,imageWidth,CV_8UC1,buf);
-        Mat img,rgbMat,grayMat;
+        Mat img,grayMat;
         cv::cvtColor(im_yuv, img, CV_YUV420sp2GRAY);
         cv::resize(img,grayMat,cv::Size(CmtWidth,CmtHeight));
+#ifdef LIBCMT
+        RotatedRect resultRect;
+        Mat rgbMat;
         cv::cvtColor(grayMat,rgbMat,CV_GRAY2RGBA);
-
 
         libCMT->processFrame(rgbMat);
         if ( libCMT->_isMatched) {
@@ -382,28 +453,35 @@ JNIEXPORT jintArray JNICALL Java_com_melonteam_objtrack_ObjTrack_processTrack(JN
         } else {
                 resultRect = RotatedRect(Point2f(0,0),Size2f(0,0),0);
         }
+        rect.x = resultRect.center.x - resultRect.size.width/2;
+        rect.y = resultRect.center.y - resultRect.size.height/2;
+        rect.width = resultRect.size.width;
+        rect.height = resultRect.size.height;
+#else
+        g_cmt->processFrame(grayMat);
+        rect.x = g_cmt->topLeft.x;
+        rect.y = g_cmt->topLeft.y;
+        rect.width = g_cmt->bottomRight.x-g_cmt->topLeft.x;
+        rect.height = g_cmt->bottomRight.y-g_cmt->topLeft.y;
+#endif
 
-        Rect rect(Point(resultRect.center.x - resultRect.size.width/2, resultRect.center.y - resultRect.size.height/2), Size(resultRect.size.width, resultRect.size.height));
         jint fill[8];
 
-        {
-                float rateX = imageWidth*1.0f/CmtWidth;
-                float rateY = imageHeight*1.0f/CmtHeight;
-                int width = rect.width*rateX;
-                int height = rect.height*rateY;
-                fill[0] = (int)rect.x*rateX;
-                fill[1] = (int)rect.y*rateY;
-                fill[2] = (int)rect.x*rateX+width;
-                fill[3] = (int)rect.y*rateY;
-                fill[4] = (int)rect.x*rateX;
-                fill[5] = (int)rect.y*rateY+height;
-                fill[6] = (int)rect.x*rateX+width;
-                fill[7] = (int)rect.y*rateY+height;
-                env->SetIntArrayRegion(result, 0, 8, fill);
-                return result;
-        }
+        float rateX = imageWidth*1.0f/CmtWidth;
+        float rateY = imageHeight*1.0f/CmtHeight;
+        int width = rect.width*rateX;
+        int height = rect.height*rateY;
+        fill[0] = (int)rect.x*rateX;
+        fill[1] = (int)rect.y*rateY;
+        fill[2] = (int)rect.x*rateX+width;
+        fill[3] = (int)rect.y*rateY;
+        fill[4] = (int)rect.x*rateX;
+        fill[5] = (int)rect.y*rateY+height;
+        fill[6] = (int)rect.x*rateX+width;
+        fill[7] = (int)rect.y*rateY+height;
+        env->SetIntArrayRegion(result, 0, 8, fill);
+        return result;
 
-        return NULL;
 }
 
 }

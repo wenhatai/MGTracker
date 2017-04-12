@@ -8,6 +8,7 @@
         android:layout_width="match_parent"
         android:hint="视频文件地址"
         android:layout_margin="10dp"
+        android:visibility="gone"
         android:layout_height="wrap_content"/>
     <android.opengl.GLSurfaceView
         android:layout_below="@id/video_filepath"

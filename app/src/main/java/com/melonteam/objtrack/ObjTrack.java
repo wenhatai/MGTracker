@@ -37,8 +37,6 @@ public class ObjTrack {
 
     public static native int[] getTrackResult();
 
-//    public static native byte[] getYUVData(int[] size);
-
     public static void OnVideoCallBack(byte[] videoData,int[] size){
         if(onVideoFrameListener != null){
             onVideoFrameListener.onVideoFrame(videoData,size);

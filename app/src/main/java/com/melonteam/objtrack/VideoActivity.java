@@ -9,13 +9,11 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -38,13 +36,21 @@ public class VideoActivity extends Activity{
      * Hold a reference to our GLSurfaceView
      */
     private GLSurfaceView mGLSurfaceView;
-    MyRenderer mRender;
+    private MyRenderer mRender;
+    private String mFilePath;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_video);
         mGLSurfaceView = (GLSurfaceView) findViewById(R.id.video_surfaceview);
+        mFilePath = getIntent().getStringExtra("FilePath");
+        File file = new File(mFilePath);
+        if(!file.exists()){
+            Toast.makeText(this,"文件不存在",Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
 
 
         // Check if the system supports OpenGL ES 2.0.
@@ -154,12 +160,10 @@ public class VideoActivity extends Activity{
         private int[] rgbTextureNames;
         VideoActivity mSurfaceViewActivity;
         DrawView mDrawView;
-        EditText mFilePathView;
+//        EditText mFilePathView;
         TextView mPlayBtn;
-        boolean isPlaying = false;
+        boolean mIsPlaying = false;
         Handler mUiHandler = new Handler(Looper.getMainLooper());
-
-        String mFilePath = Environment.getExternalStorageDirectory()+"/Download/demo.mp4";
 
 
         MyRenderer(final VideoActivity activity) {
@@ -184,8 +188,8 @@ public class VideoActivity extends Activity{
 
             rgbBuffer = ByteBuffer.allocate(mVideoWidth * mVideoHeight *3).order(ByteOrder.nativeOrder());
             mPlayBtn = (Button)mSurfaceViewActivity.findViewById(R.id.video_play);
-            mFilePathView = (EditText) mSurfaceViewActivity.findViewById(R.id.video_filepath);
-            mFilePathView.setText(mFilePath);
+//            mFilePathView = (EditText) mSurfaceViewActivity.findViewById(R.id.video_filepath);
+//            mFilePathView.setText(mFilePath);
             mDrawView = (DrawView)mSurfaceViewActivity.findViewById(R.id.video_drawview);
             mDrawView.mViewMode = DrawView.VideoMode;
             mDrawView.setDrawCallback(new DrawView.CaluateViewCallBack() {
@@ -203,6 +207,7 @@ public class VideoActivity extends Activity{
             });
             mPlayBtn.setOnClickListener(this);
             mSurfaceViewActivity.findViewById(R.id.video_restart).setOnClickListener(this);
+
         }
 
         void initView() {
@@ -243,8 +248,8 @@ public class VideoActivity extends Activity{
         }
 
         public void restartVideo(){
-            mFilePath = mFilePathView.getText().toString();
-            File file = new File(mFilePath);
+//            mFilePath = mFilePathView.getText().toString();
+            File file = new File(mSurfaceViewActivity.mFilePath);
             if(!file.exists()){
                 mUiHandler.post(new Runnable() {
                     @Override
@@ -258,8 +263,8 @@ public class VideoActivity extends Activity{
             new Thread(){
                 @Override
                 public void run() {
-                    isPlaying = false;
-                    ObjTrack.readFile(mFilePath);
+                    mIsPlaying = false;
+                    ObjTrack.readFile(mSurfaceViewActivity.mFilePath);
                 }
             }.start();
         }
@@ -321,14 +326,6 @@ public class VideoActivity extends Activity{
 
             GLES20.glDisableVertexAttribArray(mPositionHandle);
             GLES20.glDisableVertexAttribArray(mTexCoordHandle);
-
-
-
-//            int[] size = new int[2];
-//            byte[] videoData = ObjTrack.getYUVData(size);
-//            if(videoData != null && videoData.length != 0){
-//                rgbBuffer.put(videoData, 0, mVideoWidth * mVideoHeight *3).position(0);
-//            }
         }
 
         void destroy() {
@@ -360,7 +357,7 @@ public class VideoActivity extends Activity{
             }
             rgbBuffer.put(videoData,0,mVideoWidth*mVideoHeight*3).position(0);
             int[] trackResult = ObjTrack.getTrackResult();
-            if(trackResult != null ){
+            if(trackResult != null && mDrawView.mDrawRectF != null){
                 float rateY = mDrawView.getHeight() * 1.0f / mVideoHeight;
                 float rateX = mDrawView.getWidth() * 1.0f / mVideoWidth;
                 mDrawView.mDrawRectF.left = trackResult[0]*rateX;
@@ -375,14 +372,14 @@ public class VideoActivity extends Activity{
         public void onClick(View v) {
             switch (v.getId()){
                 case R.id.video_play:
-                    if(isPlaying){
+                    if(mIsPlaying){
                         ObjTrack.pauseVideo();
                         mPlayBtn.setText("播放");
                     }else{
                         ObjTrack.playVideo();
                         mPlayBtn.setText("暂停");
                     }
-                    isPlaying = !isPlaying;
+                    mIsPlaying = !mIsPlaying;
                     break;
                 case R.id.video_restart:
                     restartVideo();
