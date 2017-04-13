@@ -6,6 +6,10 @@ package com.melonteam.objtrack;
 
 public class ObjTrack {
 
+    /**
+     * 传入数据格式
+     * NV21 Android摄像头默认格式
+     */
     public static final int TYPE_NV21 = 0;
     public static final int TYPE_RGB = 1;
     public static final int TYPE_RGBA = 2;
@@ -28,18 +32,13 @@ public class ObjTrack {
 
     public static native int[] processTrack(byte[] yuvData, int dataType,int cameraWidth, int cameraHeight);
 
-    public static native void readFile(String filePath);
+    public static native void initVideo(String filePath);
 
     public static native void releaseVideo();
 
     public static native void pauseVideo();
 
     public static native void playVideo();
-
-    //left,top,right,bottom
-    public static native void setVideoTrack(int[] trackArea);
-
-    public static native int[] getTrackResult();
 
     public static void OnVideoCallBack(byte[] videoData,int[] size){
         if(onVideoFrameListener != null){

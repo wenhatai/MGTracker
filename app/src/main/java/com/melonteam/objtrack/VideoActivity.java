@@ -164,6 +164,15 @@ public class VideoActivity extends Activity{
         TextView mPlayBtn;
         boolean mIsPlaying = false;
         Handler mUiHandler = new Handler(Looper.getMainLooper());
+        byte[] mCurrentData;
+        private Boolean isInitTrack = false;
+
+        long mDrawTimeStamp = 0;
+        long mTrackTimeStamp = 0;
+        int mDrawFrame = 0;
+        int mTrackFrame = 0;
+        int mDrawFps = 0;
+        int mTrackFps = 0;
 
 
         MyRenderer(final VideoActivity activity) {
@@ -195,14 +204,7 @@ public class VideoActivity extends Activity{
             mDrawView.setDrawCallback(new DrawView.CaluateViewCallBack() {
                 @Override
                 public void onCaluate(RectF rectF) {
-                    int[] trackArea = new int[4];
-                    float rateY = mDrawView.getHeight() * 1.0f / mVideoHeight;
-                    float rateX = mDrawView.getWidth() * 1.0f / mVideoWidth;
-                    trackArea[0] = (int) (rectF.left/rateX);
-                    trackArea[1] = (int) (rectF.top/rateY);
-                    trackArea[2] = (int) (rectF.right/rateX);
-                    trackArea[3] = (int) (rectF.bottom/rateY);
-                    ObjTrack.setVideoTrack(trackArea);
+                    isInitTrack = false;
                 }
             });
             mPlayBtn.setOnClickListener(this);
@@ -263,8 +265,14 @@ public class VideoActivity extends Activity{
             new Thread(){
                 @Override
                 public void run() {
+                    android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
+                    try {
+                        Thread.sleep(200);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                     mIsPlaying = false;
-                    ObjTrack.readFile(mSurfaceViewActivity.mFilePath);
+                    ObjTrack.initVideo(mSurfaceViewActivity.mFilePath);
                 }
             }.start();
         }
@@ -355,17 +363,22 @@ public class VideoActivity extends Activity{
                 });
                 rgbBuffer = ByteBuffer.allocate(mVideoWidth * mVideoHeight *3).order(ByteOrder.nativeOrder());
             }
+            mCurrentData = videoData;
             rgbBuffer.put(videoData,0,mVideoWidth*mVideoHeight*3).position(0);
-            int[] trackResult = ObjTrack.getTrackResult();
-            if(trackResult != null && mDrawView.mDrawRectF != null){
-                float rateY = mDrawView.getHeight() * 1.0f / mVideoHeight;
-                float rateX = mDrawView.getWidth() * 1.0f / mVideoWidth;
-                mDrawView.mDrawRectF.left = trackResult[0]*rateX;
-                mDrawView.mDrawRectF.top = trackResult[1] * rateY;
-                mDrawView.mDrawRectF.right = trackResult[6] * rateX;
-                mDrawView.mDrawRectF.bottom = trackResult[7] * rateY;
-                mDrawView.postInvalidate();
+            if(mDrawView.mDrawRectF != null && (mTrackThread == null || !mTrackThread.isAlive())){
+                mTrackThread = new TrackThread();
+                mTrackThread.start();
             }
+//            int[] trackResult = ObjTrack.getTrackResult();
+//            if(trackResult != null && mDrawView.mDrawRectF != null){
+//                float rateY = mDrawView.getHeight() * 1.0f / mVideoHeight;
+//                float rateX = mDrawView.getWidth() * 1.0f / mVideoWidth;
+//                mDrawView.mDrawRectF.left = trackResult[0]*rateX;
+//                mDrawView.mDrawRectF.top = trackResult[1] * rateY;
+//                mDrawView.mDrawRectF.right = trackResult[6] * rateX;
+//                mDrawView.mDrawRectF.bottom = trackResult[7] * rateY;
+//                mDrawView.postInvalidate();
+//            }
         }
 
         @Override
@@ -390,6 +403,52 @@ public class VideoActivity extends Activity{
                     mDrawView.postInvalidate();
                     break;
                 default:break;
+            }
+        }
+
+        TrackThread mTrackThread;
+
+        class TrackThread extends Thread{
+            @Override
+            public void run() {
+                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
+                long startTimeStamp = System.currentTimeMillis();
+                mTrackFrame++;
+                if (mDrawView.mDrawRectF == null || mCurrentData == null) {
+                    return;
+                }
+                synchronized (mDrawView.mDrawRectF) {
+                    if(mSurfaceViewActivity.isFinishing()){
+                        return;
+                    }
+                    float rateY = mDrawView.getHeight() * 1.0f / mVideoHeight;
+                    float rateX = mDrawView.getWidth() * 1.0f / mVideoWidth;
+                    RectF rectF = new RectF(mDrawView.mDrawRectF);
+                    rectF.left = rectF.left / rateX;
+                    rectF.right = rectF.right / rateX;
+                    rectF.top = rectF.top / rateY;
+                    rectF.bottom = rectF.bottom / rateY;
+                    if (!isInitTrack) {
+                        ObjTrack.openTrack(mCurrentData, ObjTrack.TYPE_RGB,(int) rectF.left, (int) rectF.top, (int) rectF.width(), (int) rectF.height(), mVideoWidth, mVideoHeight);
+                        isInitTrack = true;
+                    } else {
+                        int[] cmtData = ObjTrack.processTrack(mCurrentData,ObjTrack.TYPE_RGB,mVideoWidth, mVideoHeight);
+                        if(cmtData != null && mDrawView.mDrawRectF != null){
+                            mDrawView.mDrawRectF.left = cmtData[0] * rateX;
+                            mDrawView.mDrawRectF.top = cmtData[1] * rateY;
+                            mDrawView.mDrawRectF.right = cmtData[6] * rateX;
+                            mDrawView.mDrawRectF.bottom = cmtData[7] * rateY;
+                            mDrawView.postInvalidate();
+                        }
+                    }
+                }
+                mTrackTimeStamp += (System.currentTimeMillis() - startTimeStamp);
+                if (mTrackFrame >= 30) {
+                    mTrackFrame = 0;
+                    mTrackFps = (int) (30 * 1000 / mTrackTimeStamp);
+                    mTrackTimeStamp = 0;
+//                    updateFps();
+                }
             }
         }
     }

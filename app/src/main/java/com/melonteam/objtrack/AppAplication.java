@@ -31,6 +31,10 @@ public class AppAplication extends Application {
 
     private void copyAssets() {
         AssetManager assetManager = getAssets();
+        File dirFile = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+        if(!dirFile.exists()){
+            dirFile.mkdirs();
+        }
         String[] files = null;
         try {
             files = assetManager.list("");
@@ -41,9 +45,9 @@ public class AppAplication extends Application {
             InputStream in = null;
             OutputStream out = null;
             try {
-                File dirFile = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
-                if(!dirFile.exists()){
-                    dirFile.mkdirs();
+                File file = new File(filename);
+                if(!file.exists()){
+                    continue;
                 }
                 File outFile = new File(getExternalFilesDir(null), filename);
                 if(outFile.exists()){
