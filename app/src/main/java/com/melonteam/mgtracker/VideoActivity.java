@@ -33,6 +33,7 @@ import javax.microedition.khronos.opengles.GL10;
  */
 
 public class VideoActivity extends Activity {
+    public static final String TAG = "VideoActivity";
     /**
      * Hold a reference to our GLSurfaceView
      */
@@ -294,7 +295,7 @@ public class VideoActivity extends Activity {
 
         @Override
         public void onSurfaceChanged(GL10 unused, int width, int height) {
-            Log.e("TAG", "width:" + width + "height:" + height);
+            Log.d(TAG, "width:" + width + "height:" + height);
 
             GLES20.glViewport(0, 0, width, height);
             final float ratio = (float) width / height;
@@ -392,10 +393,14 @@ public class VideoActivity extends Activity {
             }
             mCurrentData = videoData;
             rgbBuffer.put(videoData, 0, mVideoWidth * mVideoHeight * 3).position(0);
-            if (mDrawView.mDrawRectF != null && !mDrawView.mDrawRectF.isEmpty() &&
-                    (mTrackThread == null || !mTrackThread.isAlive())) {
-                mTrackThread = new TrackThread();
-                mTrackThread.start();
+            if (mDrawView.mDrawRectF != null && !mDrawView.mDrawRectF.isEmpty()) {
+                if(mTrackThread == null || !mTrackThread.isAlive()){
+                    mTrackThread = new TrackThread();
+                    mTrackThread.start();
+                }else{
+                    Log.d(TAG,"lost frame");
+                }
+
             }
 //            int[] trackResult = ObjTrack.getTrackResult();
 //            if(trackResult != null && mDrawView.mDrawRectF != null){
@@ -490,9 +495,9 @@ public class VideoActivity extends Activity {
                     }
                 }
                 mTrackTimeStamp += (System.currentTimeMillis() - startTimeStamp);
-                if (mTrackFrame >= 30) {
+                if (mTrackFrame >= 15) {
                     mTrackFrame = 0;
-                    mTrackFps = (int) (30 * 1000 / mTrackTimeStamp);
+                    mTrackFps = (int) (15 * 1000 / mTrackTimeStamp);
                     mTrackTimeStamp = 0;
                     updateFps();
                 }

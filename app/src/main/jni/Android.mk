@@ -46,11 +46,21 @@ include $(PREBUILT_STATIC_LIBRARY)
 # 	FFmpeg/lib/$(TARGET_ARCH_ABI)/libswscale.a
 # LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/FFmpeg/include
 # include $(PREBUILT_STATIC_LIBRARY)
+include $(CLEAR_VARS)
+LOCAL_MODULE     := nativemedia
+LOCAL_SRC_FILES  := MediaCodec.cpp
+
+LOCAL_C_INCLUDES += $(LOCAL_PATH)
+LOCAL_LDLIBS     += -llog -ldl -lz
+
+LOCAL_ARM_NENO := true
+
+LOCAL_STATIC_LIBRARIES += libavformat libavcodec libswscale libswresample libavutil
+include $(BUILD_SHARED_LIBRARY)
 
 include $(CLEAR_VARS)
 #OPENCV_CAMERA_MODULES:=off
 #OPENCV_INSTALL_MODULES:=off
-#OPENCV_LIB_TYPE:=SHARED
 OPENCV_LIB_TYPE:=STATIC
 ifdef OPENCV_ANDROID_SDK
   ifneq ("","$(wildcard $(OPENCV_ANDROID_SDK)/OpenCV.mk)")
@@ -60,18 +70,13 @@ ifdef OPENCV_ANDROID_SDK
   endif
 else
   include ../../sdk/native/jni/OpenCV.mk
-# include /Users/zhangpengyu/Documents/github/OpenCVSamples/sdk/native/jni/OpenCV.mk
 endif
 
-LOCAL_MODULE     := object_track
+LOCAL_MODULE     := mgtracker
 LOCAL_SRC_FILES  := jni_part.cpp LibCMT.cpp\
 CMT/common_cmt.cpp CMT/Consensus.cpp CMT/fastcluster.cpp CMT/Fusion.cpp CMT/Matcher.cpp CMT/MGCMT.cpp CMT/MGLearnT.cpp CMT/MGPerformanceAdapter.cpp CMT/MGPredictor.cpp CMT/Tracker.cpp
 
-LOCAL_C_INCLUDES += $(LOCAL_PATH)
-# LOCAL_EXPORT_C_INCLUDES := $(LOCAL_PATH)/FFmpeg/include
+# LOCAL_C_INCLUDES += $(LOCAL_PATH)
 LOCAL_LDLIBS     += -llog -ldl
 
-LOCAL_ARM_NENO := true
-
-LOCAL_STATIC_LIBRARIES += libavformat libavcodec libswscale libswresample libavutil
 include $(BUILD_SHARED_LIBRARY)
