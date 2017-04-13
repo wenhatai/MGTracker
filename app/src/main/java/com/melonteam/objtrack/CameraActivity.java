@@ -32,7 +32,7 @@ public class CameraActivity extends AppCompatActivity implements TextureView.Sur
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_camera);
         mTextureView = (TextureView) findViewById(R.id.obj_textureview);
         mTextureView.setSurfaceTextureListener(this);
         mDrawView = (DrawView) findViewById(R.id.obj_drawview);
@@ -40,8 +40,8 @@ public class CameraActivity extends AppCompatActivity implements TextureView.Sur
     }
 
     private void initView() {
-        int textureWidth = UtilMethod.getScreenWidth();
-        int textureHeight = UtilMethod.getScreenWidth() * mCameraWidth / mCameraHeight;
+        int textureWidth = UtilMethod.getDeviceWidth();
+        int textureHeight = UtilMethod.getDeviceWidth() * mCameraWidth / mCameraHeight;
         mTextureView.setLayoutParams(new RelativeLayout.LayoutParams(
                 textureWidth, textureHeight));
         mDrawView.setLayoutParams(new RelativeLayout.LayoutParams(textureWidth, textureHeight));

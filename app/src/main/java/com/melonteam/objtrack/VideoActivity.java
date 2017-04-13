@@ -31,7 +31,7 @@ import javax.microedition.khronos.opengles.GL10;
  * Created by zhangpengyu on 2017/4/4.
  */
 
-public class VideoActivity extends Activity{
+public class VideoActivity extends Activity {
     /**
      * Hold a reference to our GLSurfaceView
      */
@@ -46,8 +46,8 @@ public class VideoActivity extends Activity{
         mGLSurfaceView = (GLSurfaceView) findViewById(R.id.video_surfaceview);
         mFilePath = getIntent().getStringExtra("FilePath");
         File file = new File(mFilePath);
-        if(!file.exists()){
-            Toast.makeText(this,"文件不存在",Toast.LENGTH_SHORT).show();
+        if (!file.exists()) {
+            Toast.makeText(this, "文件不存在", Toast.LENGTH_SHORT).show();
             finish();
             return;
         }
@@ -94,7 +94,7 @@ public class VideoActivity extends Activity{
         }
     }
 
-    static class MyRenderer implements GLSurfaceView.Renderer,ObjTrack.OnVideoFrameListener, View.OnClickListener {
+    static class MyRenderer implements GLSurfaceView.Renderer, ObjTrack.OnVideoFrameListener, View.OnClickListener {
         private static final String VERTEX_SHADER = "uniform mat4 uMVPMatrix;" +
                 "attribute vec4 vPosition;" +
                 "attribute vec2 a_texCoord;" +
@@ -112,15 +112,15 @@ public class VideoActivity extends Activity{
                 "varying vec2 v_texCoord;                           \n" +
                 "uniform sampler2D y_texture;                       \n" +
                 "uniform sampler2D u_texture;                      \n" +
-                "uniform sampler2D v_texture;                      \n"+
-                "uniform sampler2D rgb_texture;\n"+
+                "uniform sampler2D v_texture;                      \n" +
+                "uniform sampler2D rgb_texture;\n" +
 
                 "void main (void){                                  \n" +
                 "   float r, g, b, y, u, v;                         \n" +
 
-                "r = texture2D(rgb_texture, v_texCoord).r;\n"+
-                "g = texture2D(rgb_texture, v_texCoord).g;\n"+
-                "b = texture2D(rgb_texture, v_texCoord).b;\n"+
+                "r = texture2D(rgb_texture, v_texCoord).r;\n" +
+                "g = texture2D(rgb_texture, v_texCoord).g;\n" +
+                "b = texture2D(rgb_texture, v_texCoord).b;\n" +
                 "   gl_FragColor = vec4(r, g, b, 1.0);              \n" +
                 "}                                                  \n";
         private static final float[] VERTEX = {   // in counterclockwise order:
@@ -160,7 +160,8 @@ public class VideoActivity extends Activity{
         private int[] rgbTextureNames;
         VideoActivity mSurfaceViewActivity;
         DrawView mDrawView;
-//        EditText mFilePathView;
+        TextView mInfoView;
+        //        EditText mFilePathView;
         TextView mPlayBtn;
         boolean mIsPlaying = false;
         Handler mUiHandler = new Handler(Looper.getMainLooper());
@@ -195,11 +196,12 @@ public class VideoActivity extends Activity{
                     .put(UV_TEX_VERTEX);
             mUvTexVertexBuffer.position(0);
 
-            rgbBuffer = ByteBuffer.allocate(mVideoWidth * mVideoHeight *3).order(ByteOrder.nativeOrder());
-            mPlayBtn = (Button)mSurfaceViewActivity.findViewById(R.id.video_play);
+            rgbBuffer = ByteBuffer.allocate(mVideoWidth * mVideoHeight * 3).order(ByteOrder.nativeOrder());
+            mPlayBtn = (Button) mSurfaceViewActivity.findViewById(R.id.video_play);
 //            mFilePathView = (EditText) mSurfaceViewActivity.findViewById(R.id.video_filepath);
 //            mFilePathView.setText(mFilePath);
-            mDrawView = (DrawView)mSurfaceViewActivity.findViewById(R.id.video_drawview);
+            mDrawView = (DrawView) mSurfaceViewActivity.findViewById(R.id.video_drawview);
+            mInfoView = (TextView) mSurfaceViewActivity.findViewById(R.id.video_infoview);
             mDrawView.mViewMode = DrawView.VideoMode;
             mDrawView.setDrawCallback(new DrawView.CaluateViewCallBack() {
                 @Override
@@ -213,8 +215,19 @@ public class VideoActivity extends Activity{
         }
 
         void initView() {
-            int textureWidth = UtilMethod.getScreenWidth();
-            int textureHeight = UtilMethod.getScreenWidth()*mVideoHeight/mVideoWidth;
+            int screenHeight = UtilMethod.getDeviceHeight();
+            int screenWidth = UtilMethod.getDeviceWidth();
+            float rateScreen = screenHeight * 1.0f / screenWidth;
+            float rateVideo = mVideoHeight * 1.0f / mVideoWidth;
+            int textureWidth;
+            int textureHeight;
+            if (rateScreen > rateVideo) {
+                textureWidth = screenWidth;
+                textureHeight = screenWidth * mVideoHeight / mVideoWidth;
+            } else {
+                textureHeight = screenHeight;
+                textureWidth = screenHeight * mVideoWidth / mVideoHeight;
+            }
             RelativeLayout.LayoutParams surfaceLayoutParams = (RelativeLayout.LayoutParams) mSurfaceViewActivity.mGLSurfaceView.getLayoutParams();
             surfaceLayoutParams.width = textureWidth;
             surfaceLayoutParams.height = textureHeight;
@@ -239,30 +252,30 @@ public class VideoActivity extends Activity{
             mPositionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
             mTexCoordHandle = GLES20.glGetAttribLocation(mProgram, "a_texCoord");
             mMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
-            mRGBTextSampleHandle = GLES20.glGetUniformLocation(mProgram,"rgb_texture");
+            mRGBTextSampleHandle = GLES20.glGetUniformLocation(mProgram, "rgb_texture");
 
             GLES20.glEnable(GLES20.GL_TEXTURE_2D);
             rgbTextureNames = new int[1];
             GLES20.glGenTextures(1, rgbTextureNames, 0);
             ObjTrack.newInstance().setVideoFrameListener(this);
 
-             restartVideo();
+            restartVideo();
         }
 
-        public void restartVideo(){
+        public void restartVideo() {
 //            mFilePath = mFilePathView.getText().toString();
             File file = new File(mSurfaceViewActivity.mFilePath);
-            if(!file.exists()){
+            if (!file.exists()) {
                 mUiHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        Toast.makeText(mSurfaceViewActivity,"文件不存在",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(mSurfaceViewActivity, "文件不存在", Toast.LENGTH_SHORT).show();
                     }
                 });
                 return;
             }
             ObjTrack.newInstance().releaseVideo();
-            new Thread(){
+            new Thread() {
                 @Override
                 public void run() {
                     android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
@@ -279,7 +292,7 @@ public class VideoActivity extends Activity{
 
         @Override
         public void onSurfaceChanged(GL10 unused, int width, int height) {
-            Log.e("TAG","width:"+width+"height:"+height);
+            Log.e("TAG", "width:" + width + "height:" + height);
 
             GLES20.glViewport(0, 0, width, height);
             final float ratio = (float) width / height;
@@ -334,10 +347,22 @@ public class VideoActivity extends Activity{
 
             GLES20.glDisableVertexAttribArray(mPositionHandle);
             GLES20.glDisableVertexAttribArray(mTexCoordHandle);
+
+            if(mDrawTimeStamp == 0){
+                mDrawTimeStamp = System.currentTimeMillis();
+            }
+            mDrawFrame++;
+            if (mDrawFrame >= 30) {
+                mDrawFrame = 0;
+                long currentTimeStamp = System.currentTimeMillis();
+                mDrawFps = (int) (30 * 1000 / (currentTimeStamp - mDrawTimeStamp));
+                mDrawTimeStamp = currentTimeStamp;
+                updateFps();
+            }
         }
 
         void destroy() {
-            GLES20.glDeleteTextures(1,rgbTextureNames,0);
+            GLES20.glDeleteTextures(1, rgbTextureNames, 0);
             ObjTrack.newInstance().setVideoFrameListener(null);
             ObjTrack.newInstance().releaseVideo();
         }
@@ -351,21 +376,21 @@ public class VideoActivity extends Activity{
 
         @Override
         public void onVideoFrame(byte[] videoData, int[] size) {
-            if(mVideoWidth != size[0] || mVideoHeight != size[1]){
+            if (mVideoWidth != size[0] || mVideoHeight != size[1]) {
                 mVideoWidth = size[0];
                 mVideoHeight = size[1];
-                mDrawView.setCameraSize(mVideoWidth,mVideoHeight);
+                mDrawView.setCameraSize(mVideoWidth, mVideoHeight);
                 mUiHandler.post(new Runnable() {
                     @Override
                     public void run() {
                         initView();
                     }
                 });
-                rgbBuffer = ByteBuffer.allocate(mVideoWidth * mVideoHeight *3).order(ByteOrder.nativeOrder());
+                rgbBuffer = ByteBuffer.allocate(mVideoWidth * mVideoHeight * 3).order(ByteOrder.nativeOrder());
             }
             mCurrentData = videoData;
-            rgbBuffer.put(videoData,0,mVideoWidth*mVideoHeight*3).position(0);
-            if(mDrawView.mDrawRectF != null && (mTrackThread == null || !mTrackThread.isAlive())){
+            rgbBuffer.put(videoData, 0, mVideoWidth * mVideoHeight * 3).position(0);
+            if (mDrawView.mDrawRectF != null && (mTrackThread == null || !mTrackThread.isAlive())) {
                 mTrackThread = new TrackThread();
                 mTrackThread.start();
             }
@@ -383,12 +408,12 @@ public class VideoActivity extends Activity{
 
         @Override
         public void onClick(View v) {
-            switch (v.getId()){
+            switch (v.getId()) {
                 case R.id.video_play:
-                    if(mIsPlaying){
+                    if (mIsPlaying) {
                         ObjTrack.newInstance().pauseVideo();
                         mPlayBtn.setText("播放");
-                    }else{
+                    } else {
                         ObjTrack.newInstance().playVideo();
                         mPlayBtn.setText("暂停");
                     }
@@ -397,18 +422,32 @@ public class VideoActivity extends Activity{
                 case R.id.video_restart:
                     restartVideo();
                     mPlayBtn.setText("播放");
-                    if(mDrawView.mDrawRectF != null){
-                        mDrawView.mDrawRectF.set(0,0,0,0);
+                    if (mDrawView.mDrawRectF != null) {
+                        mDrawView.mDrawRectF.set(0, 0, 0, 0);
                     }
                     mDrawView.postInvalidate();
                     break;
-                default:break;
+                default:
+                    break;
             }
+        }
+
+        protected void updateFps() {
+            mUiHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if(isInitTrack){
+                        mInfoView.setText("绘制fps:"+mDrawFps+",追踪fps:"+mTrackFps);
+                    }else{
+                        mInfoView.setText("绘制fps:"+mDrawFps);
+                    }
+                }
+            });
         }
 
         TrackThread mTrackThread;
 
-        class TrackThread extends Thread{
+        class TrackThread extends Thread {
             @Override
             public void run() {
                 android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
@@ -418,7 +457,7 @@ public class VideoActivity extends Activity{
                     return;
                 }
                 synchronized (mDrawView.mDrawRectF) {
-                    if(mSurfaceViewActivity.isFinishing()){
+                    if (mSurfaceViewActivity.isFinishing()) {
                         return;
                     }
                     float rateY = mDrawView.getHeight() * 1.0f / mVideoHeight;
@@ -429,11 +468,11 @@ public class VideoActivity extends Activity{
                     rectF.top = rectF.top / rateY;
                     rectF.bottom = rectF.bottom / rateY;
                     if (!isInitTrack) {
-                        ObjTrack.newInstance().openTrack(mCurrentData, ObjTrack.TYPE_RGB,(int) rectF.left, (int) rectF.top, (int) rectF.width(), (int) rectF.height(), mVideoWidth, mVideoHeight);
+                        ObjTrack.newInstance().openTrack(mCurrentData, ObjTrack.TYPE_RGB, (int) rectF.left, (int) rectF.top, (int) rectF.width(), (int) rectF.height(), mVideoWidth, mVideoHeight);
                         isInitTrack = true;
                     } else {
-                        int[] cmtData = ObjTrack.newInstance().processTrack(mCurrentData,ObjTrack.TYPE_RGB,mVideoWidth, mVideoHeight);
-                        if(cmtData != null && mDrawView.mDrawRectF != null){
+                        int[] cmtData = ObjTrack.newInstance().processTrack(mCurrentData, ObjTrack.TYPE_RGB, mVideoWidth, mVideoHeight);
+                        if (cmtData != null && mDrawView.mDrawRectF != null) {
                             mDrawView.mDrawRectF.left = cmtData[0] * rateX;
                             mDrawView.mDrawRectF.top = cmtData[1] * rateY;
                             mDrawView.mDrawRectF.right = cmtData[6] * rateX;
@@ -447,7 +486,7 @@ public class VideoActivity extends Activity{
                     mTrackFrame = 0;
                     mTrackFps = (int) (30 * 1000 / mTrackTimeStamp);
                     mTrackTimeStamp = 0;
-//                    updateFps();
+                    updateFps();
                 }
             }
         }

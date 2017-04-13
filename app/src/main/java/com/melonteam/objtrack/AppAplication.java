@@ -45,10 +45,6 @@ public class AppAplication extends Application {
             InputStream in = null;
             OutputStream out = null;
             try {
-                File file = new File(filename);
-                if(!file.exists()){
-                    continue;
-                }
                 File outFile = new File(getExternalFilesDir(null), filename);
                 if(outFile.exists()){
                     continue;

@@ -37,10 +37,10 @@
             </intent-filter>
         </activity>
         <activity android:name=".CameraActivity"
-        android:theme="@style/AppTheme.NoActionBar"/>
+        android:theme="@style/AppTheme.NoActionBar.Fullscreen"/>
 
         <activity android:name=".VideoActivity"
-                  android:theme="@style/AppTheme.NoActionBar"/>
+                  android:theme="@style/AppTheme.NoActionBar.Fullscreen"/>
     </application>
 
 </manifest>

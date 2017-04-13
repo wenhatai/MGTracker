@@ -623,8 +623,8 @@ public class Camera2BasicFragment extends Fragment
                     mCameraHeight = mPreviewSize.getWidth();
                     mCameraWidth = mPreviewSize.getHeight();
                 }
-                int textureWidth = UtilMethod.getScreenWidth();
-                int textureHeight = UtilMethod.getScreenWidth() * mCameraHeight / mCameraWidth;
+                int textureWidth = UtilMethod.getDeviceWidth();
+                int textureHeight = UtilMethod.getDeviceWidth() * mCameraHeight / mCameraWidth;
                 mTextureView.setAspectRatio(
                         mCameraWidth, mCameraHeight);
                 mDrawView.setLayoutParams(new RelativeLayout.LayoutParams(textureWidth,

@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -22,7 +23,7 @@ import pub.devrel.easypermissions.EasyPermissions;
  * Created by zhangpengyu on 2017/4/6.
  */
 
-public class ListActivity extends Activity implements EasyPermissions.PermissionCallbacks{
+public class ListActivity extends AppCompatActivity implements EasyPermissions.PermissionCallbacks{
     /**
      * 请求CAMERA权限码
      */
