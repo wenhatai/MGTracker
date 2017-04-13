@@ -12,7 +12,7 @@
         android:layout_width="1px"
         android:layout_height="1px"/>
 
-    <com.melonteam.objtrack.DrawView
+    <com.melonteam.mgtracker.DrawView
         android:id="@+id/obj_drawview"
         android:layout_width="match_parent"
         android:layout_height="200dp"/>
