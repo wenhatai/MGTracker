@@ -1,6 +1,5 @@
 package com.melonteam.objtrack;
 
-import android.content.res.Resources;
 import android.graphics.ImageFormat;
 import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
@@ -167,10 +166,10 @@ public class CameraActivity extends AppCompatActivity implements TextureView.Sur
                 rectF.top = rectF.top / rateY;
                 rectF.bottom = rectF.bottom / rateY;
                 if (!isInitTrack) {
-                    ObjTrack.openTrack(mCurrentData, ObjTrack.TYPE_NV21,(int) rectF.left, (int) rectF.top, (int) rectF.width(), (int) rectF.height(), mCameraWidth, mCameraHeight);
+                    ObjTrack.newInstance().openTrack(mCurrentData, ObjTrack.TYPE_NV21,(int) rectF.left, (int) rectF.top, (int) rectF.width(), (int) rectF.height(), mCameraWidth, mCameraHeight);
                     isInitTrack = true;
                 } else {
-                    int[] cmtData = ObjTrack.processTrack(mCurrentData,ObjTrack.TYPE_NV21,mCameraWidth, mCameraHeight);
+                    int[] cmtData = ObjTrack.newInstance().processTrack(mCurrentData,ObjTrack.TYPE_NV21,mCameraWidth, mCameraHeight);
                     if(cmtData != null && mDrawView.mDrawRectF != null){
                         mDrawView.mDrawRectF.left = cmtData[0] * rateX;
                         mDrawView.mDrawRectF.top = cmtData[1] * rateY;

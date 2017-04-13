@@ -463,11 +463,11 @@ public class SurfaceViewActivity extends Activity {
                         rectF.top = rectF.top / rateY;
                         rectF.bottom = rectF.bottom / rateY;
                         if (!isInitTrack) {
-                            ObjTrack.openTrack(currentData, ObjTrack.TYPE_NV21,(int) rectF.left, (int) rectF.top, (int) rectF.width(), (int) rectF.height(), mCameraWidth, mCameraHeight);
+                            ObjTrack.newInstance().openTrack(currentData, ObjTrack.TYPE_NV21,(int) rectF.left, (int) rectF.top, (int) rectF.width(), (int) rectF.height(), mCameraWidth, mCameraHeight);
                             isInitTrack = true;
                             android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_MORE_FAVORABLE);
                         } else {
-                            int[] cmtData = ObjTrack.processTrack(currentData,ObjTrack.TYPE_NV21,mCameraWidth, mCameraHeight);
+                            int[] cmtData = ObjTrack.newInstance().processTrack(currentData,ObjTrack.TYPE_NV21,mCameraWidth, mCameraHeight);
                             if(cmtData != null){
                                 mDrawView.mDrawRectF.left = cmtData[0] * rateX;
                                 mDrawView.mDrawRectF.top = cmtData[1] * rateY;

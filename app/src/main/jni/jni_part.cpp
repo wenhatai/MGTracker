@@ -231,11 +231,11 @@ JNIEXPORT jint JNICALL Java_com_melonteam_objtrack_ObjTrack_initVideo(JNIEnv *en
                                 }
                                 if(clazz != NULL) {
                                         //ToDO 以后改成非静态
-                                        jmethodID videoCallBackMethod = env->GetStaticMethodID(clazz, "OnVideoCallBack", "([B[I)V");
+                                        jmethodID videoCallBackMethod = env->GetMethodID(clazz, "OnVideoCallBack", "([B[I)V");
                                         if(videoCallBackMethod == NULL) {
                                                 ALOG("Cannot find OnVideoCallBack");
                                         }else{
-                                                env->CallStaticVoidMethod(clazz,videoCallBackMethod,g_ByteArray,g_SizeArray);
+                                                env->CallVoidMethod(obj,videoCallBackMethod,g_ByteArray,g_SizeArray);
                                         }
                                 }
                                 // memcpy(g_Frame+length, pFrame->data[1], length/4);

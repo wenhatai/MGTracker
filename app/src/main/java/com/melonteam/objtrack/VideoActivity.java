@@ -244,7 +244,7 @@ public class VideoActivity extends Activity{
             GLES20.glEnable(GLES20.GL_TEXTURE_2D);
             rgbTextureNames = new int[1];
             GLES20.glGenTextures(1, rgbTextureNames, 0);
-            ObjTrack.onVideoFrameListener = this;
+            ObjTrack.newInstance().setVideoFrameListener(this);
 
              restartVideo();
         }
@@ -261,7 +261,7 @@ public class VideoActivity extends Activity{
                 });
                 return;
             }
-            ObjTrack.releaseVideo();
+            ObjTrack.newInstance().releaseVideo();
             new Thread(){
                 @Override
                 public void run() {
@@ -272,7 +272,7 @@ public class VideoActivity extends Activity{
                         e.printStackTrace();
                     }
                     mIsPlaying = false;
-                    ObjTrack.initVideo(mSurfaceViewActivity.mFilePath);
+                    ObjTrack.newInstance().initVideo(mSurfaceViewActivity.mFilePath);
                 }
             }.start();
         }
@@ -338,8 +338,8 @@ public class VideoActivity extends Activity{
 
         void destroy() {
             GLES20.glDeleteTextures(1,rgbTextureNames,0);
-            ObjTrack.onVideoFrameListener = null;
-            ObjTrack.releaseVideo();
+            ObjTrack.newInstance().setVideoFrameListener(null);
+            ObjTrack.newInstance().releaseVideo();
         }
 
         static int loadShader(int type, String shaderCode) {
@@ -386,10 +386,10 @@ public class VideoActivity extends Activity{
             switch (v.getId()){
                 case R.id.video_play:
                     if(mIsPlaying){
-                        ObjTrack.pauseVideo();
+                        ObjTrack.newInstance().pauseVideo();
                         mPlayBtn.setText("播放");
                     }else{
-                        ObjTrack.playVideo();
+                        ObjTrack.newInstance().playVideo();
                         mPlayBtn.setText("暂停");
                     }
                     mIsPlaying = !mIsPlaying;
@@ -429,10 +429,10 @@ public class VideoActivity extends Activity{
                     rectF.top = rectF.top / rateY;
                     rectF.bottom = rectF.bottom / rateY;
                     if (!isInitTrack) {
-                        ObjTrack.openTrack(mCurrentData, ObjTrack.TYPE_RGB,(int) rectF.left, (int) rectF.top, (int) rectF.width(), (int) rectF.height(), mVideoWidth, mVideoHeight);
+                        ObjTrack.newInstance().openTrack(mCurrentData, ObjTrack.TYPE_RGB,(int) rectF.left, (int) rectF.top, (int) rectF.width(), (int) rectF.height(), mVideoWidth, mVideoHeight);
                         isInitTrack = true;
                     } else {
-                        int[] cmtData = ObjTrack.processTrack(mCurrentData,ObjTrack.TYPE_RGB,mVideoWidth, mVideoHeight);
+                        int[] cmtData = ObjTrack.newInstance().processTrack(mCurrentData,ObjTrack.TYPE_RGB,mVideoWidth, mVideoHeight);
                         if(cmtData != null && mDrawView.mDrawRectF != null){
                             mDrawView.mDrawRectF.left = cmtData[0] * rateX;
                             mDrawView.mDrawRectF.top = cmtData[1] * rateY;
