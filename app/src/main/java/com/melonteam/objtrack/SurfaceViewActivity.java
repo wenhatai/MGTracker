@@ -285,8 +285,8 @@ public class SurfaceViewActivity extends Activity {
         }
 
         void initView(){
-            int textureWidth = CameraActivity.getScreenWidth();
-            int textureHeight = CameraActivity.getScreenWidth() * mCameraWidth / mCameraHeight;
+            int textureWidth = UtilMethod.getScreenWidth();
+            int textureHeight = UtilMethod.getScreenWidth() * mCameraWidth / mCameraHeight;
             mView = mSurfaceViewActivity.mGLSurfaceView;
             mView.setLayoutParams(new RelativeLayout.LayoutParams(
                     textureWidth, textureHeight));

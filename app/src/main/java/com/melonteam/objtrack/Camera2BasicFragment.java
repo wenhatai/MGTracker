@@ -74,8 +74,6 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-import static com.melonteam.objtrack.CameraActivity.getScreenWidth;
-
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class Camera2BasicFragment extends Fragment
         implements View.OnClickListener, FragmentCompat.OnRequestPermissionsResultCallback {
@@ -625,8 +623,8 @@ public class Camera2BasicFragment extends Fragment
                     mCameraHeight = mPreviewSize.getWidth();
                     mCameraWidth = mPreviewSize.getHeight();
                 }
-                int textureWidth = getScreenWidth();
-                int textureHeight = getScreenWidth() * mCameraHeight / mCameraWidth;
+                int textureWidth = UtilMethod.getScreenWidth();
+                int textureHeight = UtilMethod.getScreenWidth() * mCameraHeight / mCameraWidth;
                 mTextureView.setAspectRatio(
                         mCameraWidth, mCameraHeight);
                 mDrawView.setLayoutParams(new RelativeLayout.LayoutParams(textureWidth,

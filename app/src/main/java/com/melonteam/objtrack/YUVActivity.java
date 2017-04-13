@@ -252,8 +252,8 @@ public class YUVActivity extends Activity {
         }
 
         void initView() {
-            int textureWidth = CameraActivity.getScreenWidth();
-            int textureHeight = CameraActivity.getScreenWidth() * mCameraWidth / mCameraHeight;
+            int textureWidth = UtilMethod.getScreenWidth();
+            int textureHeight = UtilMethod.getScreenWidth() * mCameraWidth / mCameraHeight;
             mSurfaceViewActivity.mGLSurfaceView.setLayoutParams(new RelativeLayout.LayoutParams(
                     textureWidth, textureHeight));
         }

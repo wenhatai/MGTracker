@@ -41,8 +41,8 @@ public class CameraActivity extends AppCompatActivity implements TextureView.Sur
     }
 
     private void initView() {
-        int textureWidth = getScreenWidth();
-        int textureHeight = getScreenWidth() * mCameraWidth / mCameraHeight;
+        int textureWidth = UtilMethod.getScreenWidth();
+        int textureHeight = UtilMethod.getScreenWidth() * mCameraWidth / mCameraHeight;
         mTextureView.setLayoutParams(new RelativeLayout.LayoutParams(
                 textureWidth, textureHeight));
         mDrawView.setLayoutParams(new RelativeLayout.LayoutParams(textureWidth, textureHeight));
@@ -128,14 +128,6 @@ public class CameraActivity extends AppCompatActivity implements TextureView.Sur
             mDrawTimeStamp = currentTimeStamp;
             updateFps();
         }
-    }
-
-    public static int getScreenWidth() {
-        return Resources.getSystem().getDisplayMetrics().widthPixels;
-    }
-
-    public static int getScreenHeight() {
-        return Resources.getSystem().getDisplayMetrics().heightPixels;
     }
 
     protected void updateFps(){
