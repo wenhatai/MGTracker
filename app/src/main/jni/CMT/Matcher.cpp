@@ -108,9 +108,9 @@ namespace cmt {
         
         
         //xperf
-        clock_t startCTime , startCTime2;
-        startCTime = clock();
-        startCTime2 = clock();
+        double startCTime , startCTime2;
+        startCTime = now_ms();
+        startCTime2 = now_ms();
         
         double sSumtime = 0;
         
@@ -121,7 +121,7 @@ namespace cmt {
             //Normalize keypoint with respect to center
             Point2f location_rel = keypoints[i].pt - center;
             
-            clock_t startCTime_S = clock();
+            double startCTime_S = now_ms();
             
             //Find potential indices for matching
             vector<int> indices_potential;
@@ -151,7 +151,7 @@ namespace cmt {
                 
             }
             
-            sSumtime += (clock() - startCTime_S);
+            sSumtime += (now_ms() - startCTime_S);
             
             //If there are no potential matches, continue
             if (indices_potential.size() == 0) continue;
@@ -186,7 +186,7 @@ namespace cmt {
         
         
         if (TIMEDEBUG) {
-            double allT = (clock()-startCTime);
+            double allT = (now_ms()-startCTime);
             printf("CMTTIME matchLocal all:%.3f,find:%.3f\n",allT*1000.0/CLOCKS_PER_SEC, sSumtime*1000.0/CLOCKS_PER_SEC);
         }
         
@@ -243,7 +243,7 @@ namespace cmt {
             return;
         }
         
-        clock_t startCTime_all = clock();
+        double startCTime_all = now_ms();
         //
         TargetModel tm;
         tm.center = center;
@@ -431,7 +431,7 @@ namespace cmt {
         
         
         if (TIMEDEBUG) {
-            printf("CMTTIME updateModel:%.3f firstKeypontsCount:%d kptArray:%lu canUse:%d canDel:%d\n",(clock()- startCTime_all)*1000.0/CLOCKS_PER_SEC,firstKeypontsCount,kptArray.size() - firstKeypontsCount,canUse,canDelCount);
+            printf("CMTTIME updateModel:%.3f firstKeypontsCount:%d kptArray:%lu canUse:%d canDel:%d\n",(now_ms()- startCTime_all)*1000.0/CLOCKS_PER_SEC,firstKeypontsCount,kptArray.size() - firstKeypontsCount,canUse,canDelCount);
             
             printf("EVENT updateModel 以匹配首帧的特征点：%d 匹配sst数：%d 全新：%d \n",curTargetMatchedkeypoints.size()  ,curTargetNewkeypoints.size() - noMKeypoints.size(),noMKeypoints.size());
         }
@@ -521,9 +521,9 @@ namespace cmt {
 //        
 //        
 //        //xperf
-//        clock_t startCTime , startCTime2;
-//        startCTime = clock();
-//        startCTime2 = clock();
+//        double startCTime , startCTime2;
+//        startCTime = now_ms();
+//        startCTime2 = now_ms();
 //        
 //        double sSumtime = 0;
 //        
@@ -534,7 +534,7 @@ namespace cmt {
 //            //Normalize keypoint with respect to center
 //            Point2f location_rel = keypoints[i].pt - center;
 //            
-//            clock_t startCTime_S = clock();
+//            double startCTime_S = now_ms();
 //            
 //            //Find potential indices for matching
 //            vector<int> indices_potential;
@@ -564,7 +564,7 @@ namespace cmt {
 //                
 //            }
 //            
-//            sSumtime += (clock() - startCTime_S);
+//            sSumtime += (now_ms() - startCTime_S);
 //            
 //            //If there are no potential matches, continue
 //            if (indices_potential.size() == 0) continue;
@@ -599,7 +599,7 @@ namespace cmt {
 //        
 //        
 //        if (TIMEDEBUG) {
-//            double allT = (clock()-startCTime);
+//            double allT = (now_ms()-startCTime);
 //            printf("CMTTIME matchLocal all:%.3f,find:%.3f\n",allT*1000.0/CLOCKS_PER_SEC, sSumtime*1000.0/CLOCKS_PER_SEC);
 //        }
         

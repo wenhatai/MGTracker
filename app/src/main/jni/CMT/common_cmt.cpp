@@ -1,33 +1,34 @@
 #include "common_cmt.h"
 
+
 using std::nth_element;
 
 namespace cmt {
-    
+
     //TODO: Check for even/uneven number of elements
     //The order of the elements of A is changed
     float median(vector<float> & A)
     {
-        
+
         if (A.size() == 0)
         {
             return numeric_limits<float>::quiet_NaN();
         }
-        
+
         nth_element(A.begin(), A.begin() + A.size()/2, A.end());
-        
+
         return A[A.size()/2];
     }
-    
+
     Point2f rotate(const Point2f v, const float angle)
     {
         Point2f r;
         r.x = cos(angle) * v.x - sin(angle) * v.y;
         r.y = sin(angle) * v.x + cos(angle) * v.y;
-        
+
         return r;
     }
-    
+
     void CalcClassWithTargetRect(const vector<cv::KeyPoint> &keypoints,const cv::Rect rect,int &fCount,int &bCount)
     {
         for (size_t i = 0; i < keypoints.size(); i++)
@@ -40,10 +41,10 @@ namespace cmt {
             {
                 bCount++;
             }
-            
+
         }
     }
-    
+
     void inoutRect(const std::vector<cv::KeyPoint>& keypoints, cv::Rect rect, std::vector<cv::KeyPoint>* pInArray, std::vector<cv::KeyPoint>* pOutArray)
     {
         for(unsigned int i = 0; i < keypoints.size(); i++)
@@ -54,7 +55,7 @@ namespace cmt {
                 {
                     pInArray->push_back(keypoints[i]);
                 }
-                
+
             }
             else
             {
@@ -78,10 +79,9 @@ namespace cmt {
 
                 return calcKPCount;
             }
-    
-    
-} /* namespace cmt */
 
+
+} /* namespace cmt */
 
 
 

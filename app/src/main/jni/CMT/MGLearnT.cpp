@@ -240,7 +240,7 @@ namespace cmt
         //return;
         //MGX_PERF_LOG_BEGIN_TIME(trackertrack)
         
-        clock_t startCTime_track  = clock();
+        double startCTime_track  = now_ms();
         //Track keypoints
         
         // 利用光流法计算关键点的当前位置。
@@ -265,7 +265,7 @@ namespace cmt
             
             //MGX_PERF_LOG_APP("track", log, trackertrack, false);
             
-            printf("CMTTIME track:%.3f tCount:%ld imgsize(x:%d,y:%d) \n",(clock()-startCTime_track)*1000.0/CLOCKS_PER_SEC,classes_tracked.size(),im_prev1.cols,im_gray2.rows);
+            printf("CMTTIME track:%.3f tCount:%ld imgsize(x:%d,y:%d) \n",(now_ms()-startCTime_track)*1000.0/CLOCKS_PER_SEC,classes_tracked.size(),im_prev1.cols,im_gray2.rows);
         }
         
     }
@@ -289,8 +289,8 @@ namespace cmt
         
         //=======
         
-        clock_t startCTime_all = clock();
-        clock_t startCTime = clock();
+        double startCTime_all = now_ms();
+        double startCTime = now_ms();
         //MGX_PERF_LOG_BEGIN_TIME(matchGlobal)
         
         //在全局和之前的数据库匹配特征点，计算出匹配的特征点
@@ -302,9 +302,9 @@ namespace cmt
 
         if (TIMEDEBUG) {
             //MGX_PERF_LOG_APP("MGLearn TmatchGlobal", "匹配全局特征点", matchGlobal, false);
-            printf("CMTTIME MGLearn matchGlobal:%.3f\n",(clock()-startCTime)*1000.0/CLOCKS_PER_SEC);
+            printf("CMTTIME MGLearn matchGlobal:%.3f\n",(now_ms()-startCTime)*1000.0/CLOCKS_PER_SEC);
         }
-        startCTime = clock();
+        startCTime = now_ms();
 
         
         //Fuse tracked and globally matched points
@@ -319,9 +319,9 @@ namespace cmt
 
         if (TIMEDEBUG) {
             //MGX_PERF_LOG_APP("MGLearn preferFirst", "融合", preferFirst, false);
-            printf("CMTTIME MGLearn preferFirst:%.3f\n",(clock()-startCTime)*1000.0/CLOCKS_PER_SEC);
+            printf("CMTTIME MGLearn preferFirst:%.3f\n",(now_ms()-startCTime)*1000.0/CLOCKS_PER_SEC);
         }
-        startCTime = clock();
+        startCTime = now_ms();
         //MGX_PERF_LOG_BEGIN_TIME(estimateScaleRotation)
         
         // 估计旋转和缩放利用最终的融合点
@@ -333,10 +333,10 @@ namespace cmt
         if (TIMEDEBUG)
         {
             //MGX_PERF_LOG_APP("estimateScaleRotation", "估计旋转和缩放", estimateScaleRotation, false);
-            printf("CMTTIME estimateScaleRotation:%.3f\n",(clock()-startCTime)*1000.0/CLOCKS_PER_SEC);
+            printf("CMTTIME estimateScaleRotation:%.3f\n",(now_ms()-startCTime)*1000.0/CLOCKS_PER_SEC);
         }
         
-        startCTime = clock();
+        startCTime = now_ms();
         //MGX_PERF_LOG_BEGIN_TIME(findConsensus)
         //FILE_LOG(logDEBUG) << "scale " << scale << ", " << "rotation " << rotation;
         
@@ -355,11 +355,11 @@ namespace cmt
         if (TIMEDEBUG)
         {
             //MGX_PERF_LOG_APP("preferFirst", "计算一致性", estimateScaleRotation, false);
-            printf("CMTTIME findConsensus:%.3f\n",(clock()-startCTime)*1000.0/CLOCKS_PER_SEC);
+            printf("CMTTIME findConsensus:%.3f\n",(now_ms()-startCTime)*1000.0/CLOCKS_PER_SEC);
         }
         
         //MGX_PERF_LOG_BEGIN_TIME(matchLocal)
-        startCTime = clock();
+        startCTime = now_ms();
  
         //Match keypoints locally 局部匹配
         vector<Point2f> points_matched_local;
@@ -370,11 +370,11 @@ namespace cmt
  
         if (TIMEDEBUG) {
             //MGX_PERF_LOG_APP("matchLocal", "局部匹配", matchLocal, false);
-            printf("CMTTIME matchLocal:%.3f \n",(clock()-startCTime)*1000.0/CLOCKS_PER_SEC);
+            printf("CMTTIME matchLocal:%.3f \n",(now_ms()-startCTime)*1000.0/CLOCKS_PER_SEC);
         }
         
         //MGX_PERF_LOG_BEGIN_TIME(preferFirst2)
-        startCTime = clock();
+        startCTime = now_ms();
 
         
         // 融合局部匹配的点和inliers
@@ -382,7 +382,7 @@ namespace cmt
 
         if (TIMEDEBUG)
         {
-            printf("CMTTIME preferFirst:%.3f points_inlier:%lu points_matched_local:%lu points_active:%lu\n",(clock()-startCTime)*1000.0/CLOCKS_PER_SEC,points_inlier.size(),points_matched_local.size(),_activePoints.size());
+            printf("CMTTIME preferFirst:%.3f points_inlier:%lu points_matched_local:%lu points_active:%lu\n",(now_ms()-startCTime)*1000.0/CLOCKS_PER_SEC,points_inlier.size(),points_matched_local.size(),_activePoints.size());
         }
         
         //MGX_PERF_LOG_APP("preferFirst2", "融合局部匹配的点和inliers", preferFirst2, false);
@@ -397,7 +397,7 @@ namespace cmt
         }
 
         
-        startCTime = clock();
+        startCTime = now_ms();
 
         // 计算出新的跟踪窗口
         cv::Size2f rectSize(_targetRect.size().width,_targetRect.size().height);
@@ -408,7 +408,7 @@ namespace cmt
         
         if (TIMEDEBUG)
         {
-            printf("CMTTIME MGLearnT %s 总耗时:%.3f \n",all?"全部检测成功":"预测检测成功",(clock()-startCTime_all)*1000.0/CLOCKS_PER_SEC);
+            printf("CMTTIME MGLearnT %s 总耗时:%.3f \n",all?"全部检测成功":"预测检测成功",(now_ms()-startCTime_all)*1000.0/CLOCKS_PER_SEC);
         }
         //FILE_LOG(logDEBUG) << "CMT::processFrame() return";
         

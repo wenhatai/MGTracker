@@ -288,9 +288,17 @@ public class VideoActivity extends Activity {
                     }
                     mIsInitTrack = false;
                     mIsPlaying = false;
+                    if (mDrawView.mDrawRectF != null) {
+                        synchronized (mDrawView.mDrawRectF){
+                            mDrawView.mDrawRectF = null;
+                            mDrawView.mRectF = null;
+                        }
+                    }
+                    mDrawView.postInvalidate();
                     NativeMedia.newInstance().initVideo(mSurfaceViewActivity.mFilePath);
                 }
             }.start();
+
         }
 
         @Override
@@ -393,12 +401,12 @@ public class VideoActivity extends Activity {
             }
             mCurrentData = videoData;
             rgbBuffer.put(videoData, 0, mVideoWidth * mVideoHeight * 3).position(0);
-            if (mDrawView.mDrawRectF != null && !mDrawView.mDrawRectF.isEmpty()) {
+            if (mDrawView.mDrawRectF != null ) {
                 if(mTrackThread == null || !mTrackThread.isAlive()){
                     mTrackThread = new TrackThread();
                     mTrackThread.start();
                 }else{
-                    Log.d(TAG,"lost frame");
+//                    Log.d(TAG,"lost frame");
                 }
 
             }
@@ -430,15 +438,6 @@ public class VideoActivity extends Activity {
                 case R.id.video_restart:
                     restartVideo();
                     mPlayBtn.setText("播放");
-                    mUiHandler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (mDrawView.mDrawRectF != null) {
-                                mDrawView.mDrawRectF.set(0, 0, 0, 0);
-                            }
-                            mDrawView.invalidate();
-                        }
-                    },200);
                     break;
                 default:
                     break;
@@ -450,6 +449,7 @@ public class VideoActivity extends Activity {
                 @Override
                 public void run() {
                     if(mIsInitTrack){
+//                        String msg = MGTracker.newInstance().getDebugInfo();
                         mInfoView.setText("绘制fps:"+mDrawFps+",追踪fps:"+mTrackFps);
                     }else{
                         mInfoView.setText("绘制fps:"+mDrawFps);
@@ -490,8 +490,16 @@ public class VideoActivity extends Activity {
                             mDrawView.mDrawRectF.top = cmtData[1] * rateY;
                             mDrawView.mDrawRectF.right = cmtData[6] * rateX;
                             mDrawView.mDrawRectF.bottom = cmtData[7] * rateY;
-                            mDrawView.postInvalidate();
+
                         }
+                        int[] predictRectf = MGTracker.newInstance().getPredictTrack(mVideoWidth, mVideoHeight);
+                        if (predictRectf != null && mDrawView.mPredictRectF != null) {
+                            mDrawView.mPredictRectF.left = predictRectf[0] * rateX;
+                            mDrawView.mPredictRectF.top = predictRectf[1] * rateY;
+                            mDrawView.mPredictRectF.right = predictRectf[6] * rateX;
+                            mDrawView.mPredictRectF.bottom = predictRectf[7] * rateY;
+                        }
+                        mDrawView.postInvalidate();
                     }
                 }
                 mTrackTimeStamp += (System.currentTimeMillis() - startTimeStamp);

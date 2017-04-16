@@ -29,11 +29,9 @@ struct ProcessFrameParam{
 // from android samples
 /* return current time in milliseconds */
 static double now_ms(void) {
-
         struct timespec res;
         clock_gettime(CLOCK_MONOTONIC, &res);
         return 1000.0 * res.tv_sec + (double) res.tv_nsec / 1e6;
-
 }
 
 #if __cplusplus < 201103L //test if c++11

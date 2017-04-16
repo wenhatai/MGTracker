@@ -204,7 +204,7 @@ JNIEXPORT jint JNICALL Java_com_melonteam_mgtracker_NativeMedia_initVideo(JNIEnv
                                         if(g_StopVideo) {
                                                 break;
                                         }
-                                        usleep(200);
+                                        usleep(50*1000);
                                 }
                         }
 

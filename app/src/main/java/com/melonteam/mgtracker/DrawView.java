@@ -8,6 +8,7 @@ import android.graphics.PointF;
 import android.graphics.RectF;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -21,6 +22,7 @@ public class DrawView extends View {
     Paint mPaint;
     RectF mRectF;
     RectF mDrawRectF;//tracker 比例
+    RectF mPredictRectF;
     float mRateX;
     float mRateY;
     CaluateViewCallBack mCallBack;
@@ -73,6 +75,7 @@ public class DrawView extends View {
         switch (event.getAction()){
             case MotionEvent.ACTION_DOWN:
                 mRectF = null;
+                mPredictRectF = null;
                 if(mDrawRectF != null){
                     synchronized (mDrawRectF){
                         mDrawRectF = null;
@@ -127,6 +130,9 @@ public class DrawView extends View {
         if(mDrawRectF == null){
             mDrawRectF = new RectF();
         }
+        if(mPredictRectF == null){
+            mPredictRectF = new RectF();
+        }
         synchronized (mDrawRectF){
             if(mViewMode == CameraMode){
                 int viewHeight = getWidth();
@@ -161,8 +167,13 @@ public class DrawView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        mPaint.setColor(Color.WHITE);
         if(mDrawRectF != null){
             canvas.drawRect(getDrawRectF(), mPaint);
+            if(mPredictRectF != null){
+                mPaint.setColor(Color.BLUE);
+                canvas.drawRect(mPredictRectF,mPaint);
+            }
             return;
         }
         if(mRectF != null){

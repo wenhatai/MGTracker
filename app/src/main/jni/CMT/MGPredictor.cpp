@@ -58,7 +58,7 @@ namespace cmt
         preOrigCenter = curOrigCenter;
         curOrigCenter = pt;
 
-        clock_t startCTime_compute = clock();
+        double startCTime_compute = now_ms();
         measurement(0) = pt.x;
         measurement(1) = pt.y;
         
@@ -67,7 +67,7 @@ namespace cmt
         Point2f statePt(estimated.at<float>(0),estimated.at<float>(1));
         
         if (TIMEDEBUG) {
-            printf("CMTTIME  Predictor::correct:%.3f\n",(clock()-startCTime_compute)*1000.0/CLOCKS_PER_SEC);
+            printf("CMTTIME  Predictor::correct:%.3f\n",(now_ms()-startCTime_compute)*1000.0/CLOCKS_PER_SEC);
         }
         
         err = pt - prePredictorCenter;
@@ -93,7 +93,7 @@ namespace cmt
     
     Rect Predictor::calcPredictRect(cv::Size preRectSize,cv::Size img_size)
     {
-        clock_t startCTime_compute = clock();
+        double startCTime_compute = now_ms();
         
         Size2f preRectSizef(preRectSize.width,preRectSize.height);
         
@@ -105,7 +105,7 @@ namespace cmt
         Rect r(Point2f(pt.x - s.width/2,pt.y - s.height/2),s);
         
         if (TIMEDEBUG) {
-            printf("CMTTIME  Predictor::calcPredictRect:%.3f\n",(clock()-startCTime_compute)*1000.0/CLOCKS_PER_SEC);
+            printf("CMTTIME  Predictor::calcPredictRect:%.3f\n",(now_ms()-startCTime_compute)*1000.0/CLOCKS_PER_SEC);
         }
         
         Point2f preTL = r.tl();
@@ -150,7 +150,7 @@ namespace cmt
     
     void Predictor::keypointsFilter(const vector<KeyPoint> &srcKeypoints,vector<KeyPoint> &dstKeypoints,Rect rect)
     {
-         clock_t startCTime_compute = clock();
+         double startCTime_compute = now_ms();
         
         for (size_t i = 0; i < srcKeypoints.size(); i++)
         {
@@ -164,7 +164,7 @@ namespace cmt
         }
         
         if (TIMEDEBUG) {
-            printf("CMTTIME  keypointsFilter::%.3f srcKeypoints:%ld dstKeypoints:%ld\n",(clock()-startCTime_compute)*1000.0/CLOCKS_PER_SEC,srcKeypoints.size(),dstKeypoints.size());
+            printf("CMTTIME  keypointsFilter::%.3f srcKeypoints:%ld dstKeypoints:%ld\n",(now_ms()-startCTime_compute)*1000.0/CLOCKS_PER_SEC,srcKeypoints.size(),dstKeypoints.size());
         }
     }
 

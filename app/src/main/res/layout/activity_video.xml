@@ -45,7 +45,6 @@
         android:text="重放"/>
 
     <TextView
-        android:singleLine="true"
         android:layout_marginLeft="10dp"
         android:textColor="@android:color/white"
         android:layout_marginBottom="10dp"

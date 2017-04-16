@@ -48,4 +48,8 @@ public class MGTracker {
     public native int[] processTrack(byte[] yuvData, int dataType,int cameraWidth, int cameraHeight);
 
 
+    public native int[] getPredictTrack(int cameraWidth, int cameraHeight);
+
+    public native String getDebugInfo();
+
 }
