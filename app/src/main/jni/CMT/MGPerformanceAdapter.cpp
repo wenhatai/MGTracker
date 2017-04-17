@@ -129,7 +129,7 @@ namespace cmt {
         //1 检查计算量：如果计算量已经小于基准，不在计算优化参数
         if (calcKPCount < MGT_BENCHMARK_CAL_ABILITY)
         {
-            printf("EVENT calcKPCount < MGT_BENCHMARK_CAL_ABILITY calcKPCount:%lu m_initScale:%.2f,m_nPerfFastThreshold:%d\n",calcKPCount,_initScale,_runingFastThreshold);
+            ALOG("EVENT calcKPCount < MGT_BENCHMARK_CAL_ABILITY calcKPCount:%lu m_initScale:%.2f,m_nPerfFastThreshold:%d\n",calcKPCount,_initScale,_runingFastThreshold);
             return;
         }
 
@@ -166,7 +166,7 @@ namespace cmt {
                 //小于基准值就打行日志
                 if (calcKPCount < MGT_BENCHMARK_CAL_ABILITY )
                 {
-                    printf("EVENT 缩小尺寸 calcKPCount < MGT_BENCHMARK_CAL_ABILITY calcKPCount:%lu m_initScale:%.2f,_runingFastThreshold:%d\n",calcKPCount,_initScale,_runingFastThreshold);
+                    ALOG("EVENT 缩小尺寸 calcKPCount < MGT_BENCHMARK_CAL_ABILITY calcKPCount:%lu m_initScale:%.2f,_runingFastThreshold:%d\n",calcKPCount,_initScale,_runingFastThreshold);
                 }
 
                 scale = preScale;
@@ -263,7 +263,7 @@ namespace cmt {
         kpPrecent = (float)fCount/(float)fArea;
 
         if (TIMEDEBUG) {
-            printf("EVENT PerformanceAdapter： %d im_gray.rows:%d,im_gray.cols:%d, allCount:%d,allCount:%d,fCount:%d\n",calcKPCount,im_gray.rows,im_gray.cols, allCount,allCount,fCount);
+            ALOG("EVENT PerformanceAdapter： %d im_gray.rows:%d,im_gray.cols:%d, allCount:%d,allCount:%d,fCount:%d\n",calcKPCount,im_gray.rows,im_gray.cols, allCount,allCount,fCount);
         }
     }
 
@@ -332,7 +332,7 @@ namespace cmt {
             _targetKeypontsDistributionCount.push_back(rangeCountArray[*iter]);
 
             if (TIMEDEBUG) {
-                printf("EVENT calcDistribution range(%d,%d) count:%d \n",rangeArray[*iter].first,rangeArray[*iter].second,rangeCountArray[*iter]);
+                ALOG("EVENT calcDistribution range(%d,%d) count:%d \n",rangeArray[*iter].first,rangeArray[*iter].second,rangeCountArray[*iter]);
             }
         }
 
@@ -528,7 +528,7 @@ namespace cmt {
 
         if (TIMEDEBUG)
         {
-            printf("CMTTIME 区域密度响应分布过滤法耗时:%.3f 过滤：%d 过滤前：%lu 过滤后:%lu  \n",(now_ms()-startCTime_all)*1000.0/CLOCKS_PER_SEC,delKPTCount,srcKeypoints.size(),dstKeypoints.size());
+            ALOG("CMTTIME 区域密度响应分布过滤法耗时:%.3f 过滤：%d 过滤前：%lu 过滤后:%lu  \n",(now_ms()-startCTime_all)*1000.0/CLOCKS_PER_SEC,delKPTCount,srcKeypoints.size(),dstKeypoints.size());
         }
 
 
@@ -695,7 +695,7 @@ namespace cmt {
 //
 //        if (TIMEDEBUG)
 //        {
-//            printf("CMTTIME 区域密度响应分布过滤法耗时:%.3f 过滤：%d 过滤前：%lu 过滤后:%lu  \n",(now_ms()-startCTime_all)*1000.0/CLOCKS_PER_SEC,delKPTCount,srcKeypoints.size(),dstKeypoints.size());
+//            ALOG("CMTTIME 区域密度响应分布过滤法耗时:%.3f 过滤：%d 过滤前：%lu 过滤后:%lu  \n",(now_ms()-startCTime_all)*1000.0/CLOCKS_PER_SEC,delKPTCount,srcKeypoints.size(),dstKeypoints.size());
 //        }
 //
 //
@@ -723,7 +723,7 @@ namespace cmt {
 
             cvtColor(reSizeImage_RGBA,reSizeGrayImage,CV_RGB2GRAY);
 
-            printf("CMTTIME cmtTracking cvtColor reSize:%.3f\n",(now_ms()-startCTime)*1000.0/CLOCKS_PER_SEC);
+            ALOG("CMTTIME cmtTracking cvtColor reSize:%.3f\n",(now_ms()-startCTime)*1000.0/CLOCKS_PER_SEC);
 
             MG_FASTX(reSizeGrayImage, keypoints, _runingFastThreshold);
         }
@@ -733,7 +733,7 @@ namespace cmt {
 
             cvtColor(im_RGBA,reSizeGrayImage,CV_RGB2GRAY);
 
-            printf("CMTTIME cmtTracking cvtColor:%.3f\n",(now_ms()-startCTime)*1000.0/CLOCKS_PER_SEC);
+            ALOG("CMTTIME cmtTracking cvtColor:%.3f\n",(now_ms()-startCTime)*1000.0/CLOCKS_PER_SEC);
 
             MG_FASTX(reSizeGrayImage, keypoints, _runingFastThreshold);
 

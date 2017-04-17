@@ -1,6 +1,11 @@
 package com.melonteam.mgtracker;
 
 
+import android.text.TextUtils;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Created by zhangpengyu on 2017/3/20.
  */
@@ -50,6 +55,47 @@ public class MGTracker {
 
     public native int[] getPredictTrack(int cameraWidth, int cameraHeight);
 
-    public native String getDebugInfo();
+    public native String getDebugJson();
+
+    public DebugInfo getDebugInfo(){
+         String json = getDebugJson();
+        if(TextUtils.isEmpty(json)){
+            return null;
+        }
+        try {
+            JSONObject jsonObject = new JSONObject(json);
+
+            DebugInfo debugInfo = new DebugInfo();
+            debugInfo.trackFrame = (float) jsonObject.optDouble("trackFrame");
+            debugInfo.trackCost = (float) jsonObject.optDouble("trackCost");
+            debugInfo.trackScale = (float)jsonObject.optDouble("trackScale");
+            debugInfo.trackDensity = jsonObject.optLong("trackDensity");
+            debugInfo.matchPercent = (float) jsonObject.optDouble("matchPercent");
+            debugInfo.isMatch = jsonObject.optInt("isMatch");
+            debugInfo.activePoints = jsonObject.optInt("activePoints");
+            debugInfo.targetPoints = jsonObject.optInt("targetPoints");
+            debugInfo.framePoints = jsonObject.optInt("framePoints");
+            debugInfo.predictPoints = jsonObject.optInt("predictPoints");
+            debugInfo.rdtdCount = jsonObject.optInt("rdtdCount");
+            return debugInfo;
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static class DebugInfo{
+        public float trackFrame;
+        public float trackCost;
+        public float trackScale;
+        public long trackDensity;
+        public float matchPercent;
+        public int isMatch;
+        public int activePoints;
+        public int targetPoints;
+        public int framePoints;
+        public int predictPoints;
+        public int rdtdCount;
+    }
 
 }

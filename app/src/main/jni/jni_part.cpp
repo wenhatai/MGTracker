@@ -132,14 +132,14 @@ void caluateResizeSize(int width,int height){
         }
 }
 
-JNIEXPORT jstring JNICALL Java_com_melonteam_mgtracker_MGTracker_getDebugInfo(JNIEnv *env,jobject){
+JNIEXPORT jstring JNICALL Java_com_melonteam_mgtracker_MGTracker_getDebugJson(JNIEnv *env,jobject){
         if(!CMTinitiated){
           return NULL;
         }
         if(g_debufInfo == NULL) {
-                g_debufInfo = new char[100];
+                g_debufInfo = new char[150];
         }
-        sprintf(g_debufInfo,"追踪帧率:%.2f 跟踪耗时%.2f \n缩放：%.2f 密度: %ld 结果：%.1f 预测结果：%d\n特征点:活动:%d|目标:%d|背景:%d|预测:%d|RDTD:%d",
+        sprintf(g_debufInfo,"{\"trackFrame\":%.2f,\"trackCost\":%.2f,\"trackScale\":%.2f,\"trackDensity\":%ld,\"matchPercent\":%.1f,\"isMatch\":%d,\"activePoints\":%d,\"targetPoints\":%d,\"framePoints\":%d,\"predictPoints\":%d,\"rdtdCount\":%d}",
                 libCMT->track30AvgFrameRate,libCMT->trackCurFrameCost,libCMT->_perfAdapter._initScale,static_cast<long>(libCMT->_perfAdapter._runingKPTRegionalDensity*100*100),libCMT->_matchedPrecent,libCMT->_isCurProdictorMatched,
               libCMT->_activePoints.size(),libCMT->_matcher.target_length,libCMT->_curFrameKeypointsCount,libCMT->_curPreditorFilterFrameKeypointsCount,libCMT->_curFilterByRDTDKPTCount
             );

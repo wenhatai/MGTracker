@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Process;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -171,11 +172,8 @@ public class VideoActivity extends Activity {
         private Boolean mIsInitTrack = false;
 
         long mDrawTimeStamp = 0;
-        long mTrackTimeStamp = 0;
         int mDrawFrame = 0;
-        int mTrackFrame = 0;
-        int mDrawFps = 0;
-        int mTrackFps = 0;
+        float mDrawFps = 0;
 
 
         MyRenderer(final VideoActivity activity) {
@@ -366,7 +364,7 @@ public class VideoActivity extends Activity {
             if (mDrawFrame >= 30) {
                 mDrawFrame = 0;
                 long currentTimeStamp = System.currentTimeMillis();
-                mDrawFps = (int) (30 * 1000 / (currentTimeStamp - mDrawTimeStamp));
+                mDrawFps =  (30 * 1000.0f / (currentTimeStamp - mDrawTimeStamp));
                 mDrawTimeStamp = currentTimeStamp;
                 updateFps();
             }
@@ -448,9 +446,12 @@ public class VideoActivity extends Activity {
             mUiHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    if(mIsInitTrack){
-//                        String msg = MGTracker.newInstance().getDebugInfo();
-                        mInfoView.setText("绘制fps:"+mDrawFps+",追踪fps:"+mTrackFps);
+                    MGTracker.DebugInfo debugInfo = MGTracker.newInstance().getDebugInfo();
+                    if(debugInfo != null && mIsInitTrack){
+                        String logInfo = String.format("绘制帧率:%.2f 追踪帧率:%.2f 跟踪耗时%.2f \n缩放：%.2f 密度: %d 结果：%.1f 预测结果：%d\n特征点:活动:%d|目标:%d|背景:%d|预测:%d|RDTD:%d",
+                                mDrawFps,debugInfo.trackFrame,debugInfo.trackCost,debugInfo.trackScale,debugInfo.trackDensity,debugInfo.matchPercent,debugInfo.isMatch,
+                                debugInfo.activePoints,debugInfo.targetPoints,debugInfo.framePoints,debugInfo.predictPoints,debugInfo.rdtdCount);
+                        mInfoView.setText(logInfo);
                     }else{
                         mInfoView.setText("绘制fps:"+mDrawFps);
                     }
@@ -464,8 +465,6 @@ public class VideoActivity extends Activity {
             @Override
             public void run() {
                 android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
-                long startTimeStamp = System.currentTimeMillis();
-                mTrackFrame++;
                 if (mDrawView.mDrawRectF == null || mCurrentData == null) {
                     return;
                 }
@@ -501,13 +500,6 @@ public class VideoActivity extends Activity {
                         }
                         mDrawView.postInvalidate();
                     }
-                }
-                mTrackTimeStamp += (System.currentTimeMillis() - startTimeStamp);
-                if (mTrackFrame >= 15) {
-                    mTrackFrame = 0;
-                    mTrackFps = (int) (15 * 1000 / mTrackTimeStamp);
-                    mTrackTimeStamp = 0;
-                    updateFps();
                 }
             }
         }

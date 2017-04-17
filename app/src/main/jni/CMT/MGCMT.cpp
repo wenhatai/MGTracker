@@ -31,7 +31,7 @@ namespace cmt
 
     CMT::CMT():_sumCalcTime(0),_calcTimeframeCount(0),_curTargetScale(1.0)
     {
-        printf("EVENT CMT 创建 %p\n",this);
+        ALOG("EVENT CMT 创建 %p\n",this);
 
         _isDebugOpenPredictor = true;
         isDebugModel = false;
@@ -69,7 +69,7 @@ namespace cmt
 
     CMT::~CMT()
     {
-        printf("EVENT CMT 析构 %p\n",this);
+        ALOG("EVENT CMT 析构 %p\n",this);
 
         // delete _pLearn_MGT_T1;
         // delete _pLearn_MGT_T2;
@@ -84,7 +84,7 @@ namespace cmt
         _posPredictor = Predictor();
         if (TIMEDEBUG)
         {
-            printf("EVENT CMT CMT::initialize: Rect:(%d,%d,%d,%d)\n",initRect.x,initRect.y,initRect.width,initRect.height);
+            ALOG("EVENT CMT CMT::initialize: Rect:(%d,%d,%d,%d)\n",initRect.x,initRect.y,initRect.width,initRect.height);
         }
 
         //保存初始值
@@ -103,10 +103,10 @@ namespace cmt
         _perfAdapter.calcInitKeypointsAndOptimumPerfParam(im_RGBA,initRect,grayImage,rect,keypoints);
         if (TIMEDEBUG)
         {
-            printf("CMTTIME calcInitKeypointsAndOptimumPerfParam:%.3f,scale:%.3f,th:%d\n",(now_ms()-startCTime_calcInitKeypointsAndOptimumPerfParam)*1000.0/CLOCKS_PER_SEC,_perfAdapter._initScale,_perfAdapter._initFastThreshold);
+            ALOG("CMTTIME calcInitKeypointsAndOptimumPerfParam:%.3f,scale:%.3f,th:%d\n",(now_ms()-startCTime_calcInitKeypointsAndOptimumPerfParam)*1000.0/CLOCKS_PER_SEC,_perfAdapter._initScale,_perfAdapter._initFastThreshold);
 
             char log[100] = {0};
-            sprintf(log, "初始化评估性能参数scale:%.3f,th:%d",_perfAdapter._initScale,_perfAdapter._initFastThreshold);
+            ALOG(log, "初始化评估性能参数scale:%.3f,th:%d",_perfAdapter._initScale,_perfAdapter._initFastThreshold);
 //            //MGX_PERF_LOG_APP("calcInitKeypointsAndOptimumPerfParam", log, calcInitKeypointsAndOptimumPerfParam, false);
         }
 
@@ -288,7 +288,7 @@ namespace cmt
             reSizeMatcher(tempScale);
 
 
-            printf("EVENT calcRuningKeypoints perfAdapter.m_initScale:%.2f manualScale :%.2f tempScale: %.2f cur_orig_im_RGBA.w:%d cur_orig_im_RGBA.h:%d im_pre.w: %d im_pre.h: %d \n",_perfAdapter._initScale,_manualScale,tempScale,cur_orig_im_RGBA.cols, cur_orig_im_RGBA.rows,im_prev.cols,im_prev.rows);
+            ALOG("EVENT calcRuningKeypoints perfAdapter.m_initScale:%.2f manualScale :%.2f tempScale: %.2f cur_orig_im_RGBA.w:%d cur_orig_im_RGBA.h:%d im_pre.w: %d im_pre.h: %d \n",_perfAdapter._initScale,_manualScale,tempScale,cur_orig_im_RGBA.cols, cur_orig_im_RGBA.rows,im_prev.cols,im_prev.rows);
         }
 
         double startCTime_all = now_ms();
@@ -450,10 +450,10 @@ namespace cmt
         if (TIMEDEBUG)
         {
 //            //MGX_PERF_LOG_APP("detect", "检测特征点", detect, false);
-            printf("CMTTIME detect:%.3f keypoints.size:%lu\n",(now_ms()- startCTime_calcRuningKeypoints)*1000.0/CLOCKS_PER_SEC,keypoints.size());
-            printf("EVENT calcKpt： %ld im_gray.rows:%d,im_gray.cols:%d, allCount:%ld,allCount:%d,fCount:%d\n",calcKpt,grayImage.rows,grayImage.cols, keypoints.size(),_matcher.matcher_length,_matcher.target_length);
+            ALOG("CMTTIME detect:%.3f keypoints.size:%lu\n",(now_ms()- startCTime_calcRuningKeypoints)*1000.0/CLOCKS_PER_SEC,keypoints.size());
+            ALOG("EVENT calcKpt： %ld im_gray.rows:%d,im_gray.cols:%d, allCount:%ld,allCount:%d,fCount:%d\n",calcKpt,grayImage.rows,grayImage.cols, keypoints.size(),_matcher.matcher_length,_matcher.target_length);
 
-            printf("EVENT calcRuningKeypoints manaulScale:%.2f cur_orig_im_RGBA.w:%d cur_orig_im_RGBA.h:%d im_pre.w: %d im_pre.h: %d im_cur.w:%d im_cur.h:%d\n",_perfAdapter._initScale,curRGBImage.cols, curRGBImage.rows,im_prev.cols,im_prev.rows,grayImage.cols,grayImage.rows);
+            ALOG("EVENT calcRuningKeypoints manaulScale:%.2f cur_orig_im_RGBA.w:%d cur_orig_im_RGBA.h:%d im_pre.w: %d im_pre.h: %d im_cur.w:%d im_cur.h:%d\n",_perfAdapter._initScale,curRGBImage.cols, curRGBImage.rows,im_prev.cols,im_prev.rows,grayImage.cols,grayImage.rows);
         }
 
         _curFrameKeypointsCount = (int)keypoints.size();
@@ -539,7 +539,7 @@ namespace cmt
 
                 if (TIMEDEBUG)
                 {
-                    printf("CMTTIME predictor roiTrackedPoints:%ld\n",trackedPoints.size());
+                    ALOG("CMTTIME predictor roiTrackedPoints:%ld\n",trackedPoints.size());
                 }
 
 //                //对比测试
@@ -553,7 +553,7 @@ namespace cmt
 //
 //                    if (trackedClasses.size() != classes_tracked2.size())
 //                    {
-//                        printf("CMTTIME predictor roiTrackedPoints:%ld alltrackCount:%ld\n",trackedPoints.size(),classes_tracked2.size());
+//                        ALOG("CMTTIME predictor roiTrackedPoints:%ld alltrackCount:%ld\n",trackedPoints.size(),classes_tracked2.size());
 //                    }
 //
 //                }
@@ -594,7 +594,7 @@ namespace cmt
             }
 
             if (TIMEDEBUG) {
-                printf("EVENT 预测检测%s _isMatched:%s _matchedPrecent:%.2f keypoints:%lu preKeypoints:%lu \n",_isCurProdictorMatched?"成功":"失败", _isMatched?"成功":"失败",_matchedPrecent,keypoints.size(),predictorKeypoints.size());
+                ALOG("EVENT 预测检测%s _isMatched:%s _matchedPrecent:%.2f keypoints:%lu preKeypoints:%lu \n",_isCurProdictorMatched?"成功":"失败", _isMatched?"成功":"失败",_matchedPrecent,keypoints.size(),predictorKeypoints.size());
             }
 
             //输出预测框供调试用
@@ -746,7 +746,7 @@ namespace cmt
 
 //            //MGX_PERF_LOG_APP("track", log, trackertrack, false);
 
-            printf("CMTTIME track:%.3f tCount:%ld imgsize(x:%d,y:%d) \n",(now_ms()-startCTime_track)*1000.0/CLOCKS_PER_SEC,classes_tracked.size(),im_prev1.cols,im_gray2.rows);
+            ALOG("CMTTIME track:%.3f tCount:%ld imgsize(x:%d,y:%d) \n",(now_ms()-startCTime_track)*1000.0/CLOCKS_PER_SEC,classes_tracked.size(),im_prev1.cols,im_gray2.rows);
         }
 
     }
@@ -786,7 +786,7 @@ namespace cmt
 
         if (TIMEDEBUG) {
 //            //MGX_PERF_LOG_APP("compute", "描述特征点", compute, false);
-            printf("CMTTIME compute:%.3f\n",(now_ms()-startCTime_compute)*1000.0/CLOCKS_PER_SEC);
+            ALOG("CMTTIME compute:%.3f\n",(now_ms()-startCTime_compute)*1000.0/CLOCKS_PER_SEC);
         }
 
         double startCTime = now_ms();
@@ -801,7 +801,7 @@ namespace cmt
 
         if (TIMEDEBUG) {
 //            //MGX_PERF_LOG_APP("matchGlobal", "匹配全局特征点", matchGlobal, false);
-            printf("CMTTIME matchGlobal:%.3f\n",(now_ms()-startCTime)*1000.0/CLOCKS_PER_SEC);
+            ALOG("CMTTIME matchGlobal:%.3f\n",(now_ms()-startCTime)*1000.0/CLOCKS_PER_SEC);
         }
         startCTime = now_ms();
 
@@ -818,7 +818,7 @@ namespace cmt
 
         if (TIMEDEBUG) {
 //            //MGX_PERF_LOG_APP("preferFirst", "描述特征点", preferFirst, false);
-            printf("CMTTIME preferFirst:%.3f\n",(now_ms()-startCTime)*1000.0/CLOCKS_PER_SEC);
+            ALOG("CMTTIME preferFirst:%.3f\n",(now_ms()-startCTime)*1000.0/CLOCKS_PER_SEC);
         }
         startCTime = now_ms();
         //MGX_PERF_LOG_BEGIN_TIME(estimateScaleRotation)
@@ -832,7 +832,7 @@ namespace cmt
         if (TIMEDEBUG)
         {
 //            //MGX_PERF_LOG_APP("estimateScaleRotation", "估计旋转和缩放", estimateScaleRotation, false);
-            printf("CMTTIME estimateScaleRotation:%.3f\n",(now_ms()-startCTime)*1000.0/CLOCKS_PER_SEC);
+            ALOG("CMTTIME estimateScaleRotation:%.3f\n",(now_ms()-startCTime)*1000.0/CLOCKS_PER_SEC);
         }
 
         startCTime = now_ms();
@@ -874,7 +874,7 @@ namespace cmt
         if (TIMEDEBUG)
         {
 //            //MGX_PERF_LOG_APP("preferFirst", "计算一致性", estimateScaleRotation, false);
-            printf("CMTTIME findConsensus:%.3f\n",(now_ms()-startCTime)*1000.0/CLOCKS_PER_SEC);
+            ALOG("CMTTIME findConsensus:%.3f\n",(now_ms()-startCTime)*1000.0/CLOCKS_PER_SEC);
         }
 
         //MGX_PERF_LOG_BEGIN_TIME(matchLocal)
@@ -908,7 +908,7 @@ namespace cmt
 
         if (TIMEDEBUG) {
 //            //MGX_PERF_LOG_APP("matchLocal", "局部匹配", matchLocal, false);
-            printf("CMTTIME matchLocal:%.3f \n",(now_ms()-startCTime)*1000.0/CLOCKS_PER_SEC);
+            ALOG("CMTTIME matchLocal:%.3f \n",(now_ms()-startCTime)*1000.0/CLOCKS_PER_SEC);
         }
 
         //MGX_PERF_LOG_BEGIN_TIME(preferFirst2)
@@ -920,7 +920,7 @@ namespace cmt
 
         if (TIMEDEBUG)
         {
-            printf("CMTTIME preferFirst:%.3f points_inlier:%lu points_matched_local:%lu points_active:%lu\n",(now_ms()-startCTime)*1000.0/CLOCKS_PER_SEC,points_inlier.size(),points_matched_local.size(),_activePoints.size());
+            ALOG("CMTTIME preferFirst:%.3f points_inlier:%lu points_matched_local:%lu points_active:%lu\n",(now_ms()-startCTime)*1000.0/CLOCKS_PER_SEC,points_inlier.size(),points_matched_local.size(),_activePoints.size());
         }
 
 //        //MGX_PERF_LOG_APP("preferFirst2", "融合局部匹配的点和inliers", preferFirst2, false);
@@ -1003,7 +1003,7 @@ namespace cmt
 
 
         if (TIMEDEBUG) {
-            printf("CMTTIME %s 总耗时:%.3f \n",all?"全部检测成功":"预测检测成功",(now_ms()-startCTime_all)*1000.0/CLOCKS_PER_SEC);
+            ALOG("CMTTIME %s 总耗时:%.3f \n",all?"全部检测成功":"预测检测成功",(now_ms()-startCTime_all)*1000.0/CLOCKS_PER_SEC);
         }
         //FILE_LOG(logDEBUG) << "CMT::processFrame() return";
 
@@ -1055,7 +1055,7 @@ namespace cmt
 
 //        //MGX_PERF_LOG_APP("compute", "描述特征点", compute, false);
         if (TIMEDEBUG) {
-            printf("CMTTIME compute:%.3f\n",(now_ms()-startCTime_compute)*1000.0/CLOCKS_PER_SEC);
+            ALOG("CMTTIME compute:%.3f\n",(now_ms()-startCTime_compute)*1000.0/CLOCKS_PER_SEC);
         }
 
         double startCTime = now_ms();
@@ -1070,7 +1070,7 @@ namespace cmt
 //        //MGX_PERF_LOG_APP("matchGlobal", "匹配全局特征点", matchGlobal, false);
 
         if (TIMEDEBUG) {
-            printf("CMTTIME matchGlobal:%.3f\n",(now_ms()-startCTime)*1000.0/CLOCKS_PER_SEC);
+            ALOG("CMTTIME matchGlobal:%.3f\n",(now_ms()-startCTime)*1000.0/CLOCKS_PER_SEC);
         }
         startCTime = now_ms();
         //FILE_LOG(logDEBUG) << points_matched_global.size() << " points matched globally.";
@@ -1090,7 +1090,7 @@ namespace cmt
 
         //MGX_PERF_LOG_BEGIN_TIME(estimateScaleRotation)
         if (TIMEDEBUG) {
-            printf("CMTTIME preferFirst:%.3f\n",(now_ms()-startCTime)*1000.0/CLOCKS_PER_SEC);
+            ALOG("CMTTIME preferFirst:%.3f\n",(now_ms()-startCTime)*1000.0/CLOCKS_PER_SEC);
         }
         startCTime = now_ms();
         //FILE_LOG(logDEBUG) << points_fused.size() << " points fused.";
@@ -1105,7 +1105,7 @@ namespace cmt
 
         //MGX_PERF_LOG_BEGIN_TIME(findConsensus)
         if (TIMEDEBUG) {
-            printf("CMTTIME estimateScaleRotation:%.3f\n",(now_ms()-startCTime)*1000.0/CLOCKS_PER_SEC);
+            ALOG("CMTTIME estimateScaleRotation:%.3f\n",(now_ms()-startCTime)*1000.0/CLOCKS_PER_SEC);
         }
         startCTime = now_ms();
         //FILE_LOG(logDEBUG) << "scale " << scale << ", " << "rotation " << rotation;
@@ -1145,7 +1145,7 @@ namespace cmt
 
         //MGX_PERF_LOG_BEGIN_TIME(matchLocal)
         if (TIMEDEBUG) {
-            printf("CMTTIME findConsensus:%.3f\n",(now_ms()-startCTime)*1000.0/CLOCKS_PER_SEC);
+            ALOG("CMTTIME findConsensus:%.3f\n",(now_ms()-startCTime)*1000.0/CLOCKS_PER_SEC);
         }
         startCTime = now_ms();
         //FILE_LOG(logDEBUG) << points_inlier.size() << " inlier points.";
@@ -1180,7 +1180,7 @@ namespace cmt
 
         //MGX_PERF_LOG_BEGIN_TIME(preferFirst2)
         if (TIMEDEBUG) {
-            printf("CMTTIME matchLocal:%.3f \n",(now_ms()-startCTime)*1000.0/CLOCKS_PER_SEC);
+            ALOG("CMTTIME matchLocal:%.3f \n",(now_ms()-startCTime)*1000.0/CLOCKS_PER_SEC);
         }
         startCTime = now_ms();
         //FILE_LOG(logDEBUG) << points_matched_local.size() << " points matched locally.";
@@ -1191,7 +1191,7 @@ namespace cmt
         //    points_active = points_fused;
         //    classes_active = classes_fused;
         if (TIMEDEBUG) {
-            printf("CMTTIME preferFirst:%.3f points_inlier:%lu points_matched_local:%lu points_active:%lu\n",(now_ms()-startCTime)*1000.0/CLOCKS_PER_SEC,points_inlier.size(),points_matched_local.size(),_activePoints.size());
+            ALOG("CMTTIME preferFirst:%.3f points_inlier:%lu points_matched_local:%lu points_active:%lu\n",(now_ms()-startCTime)*1000.0/CLOCKS_PER_SEC,points_inlier.size(),points_matched_local.size(),_activePoints.size());
         }
 
 //        //MGX_PERF_LOG_APP("preferFirst2", "融合局部匹配的点和inliers", preferFirst2, false);
@@ -1266,7 +1266,7 @@ namespace cmt
 
 
         if (TIMEDEBUG) {
-            printf("CMTTIME %s 总耗时:%.3f \n",all?"全部检测成功":"预测检测成功",(now_ms()-startCTime_all)*1000.0/CLOCKS_PER_SEC);
+            ALOG("CMTTIME %s 总耗时:%.3f \n",all?"全部检测成功":"预测检测成功",(now_ms()-startCTime_all)*1000.0/CLOCKS_PER_SEC);
         }
         //FILE_LOG(logDEBUG) << "CMT::processFrame() return";
 
@@ -1322,7 +1322,7 @@ namespace cmt
 
         if (TIMEDEBUG)
         {
-            printf("EVENT calcIsMatched curScale:%.2f preScale:%.2f matchPrecent:%.3f\n",curScale  ,prePreTargetScale  ,_matchedPrecent);
+            ALOG("EVENT calcIsMatched curScale:%.2f preScale:%.2f matchPrecent:%.3f\n",curScale  ,prePreTargetScale  ,_matchedPrecent);
         }
 
         return _isMatched;
