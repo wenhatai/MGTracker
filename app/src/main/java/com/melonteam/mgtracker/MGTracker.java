@@ -34,6 +34,7 @@ public class MGTracker {
 
     public static void init() {
         try {
+            System.loadLibrary("opencv_java3");
             System.loadLibrary("mgtracker");
         } catch (Exception e) {
             e.printStackTrace();
