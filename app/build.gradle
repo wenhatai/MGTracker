@@ -11,10 +11,19 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
-            cmake {
+//            cmake {
+//                cppFlags "-std=c++11","-frtti", "-fexceptions"
+//                arguments  '-DANDROID_STL=gnustl_static',"-DANDROID_ARM_NEON=TRUE","-DANDROID_PLATFORM=android-23"
+////                arguments '-DANDROID_TOOLCHAIN=clang'
+//            }
+
+            ndkBuild {
+                arguments 'APP_STL=gnustl_static',
+                        'APP_PLATFORM=android-25',
+                        'NDK_TOOLCHAIN_VERSION=4.9'
+//                arguments "NDK_APPLICATION_MK=src/main/cpp/Application.mk"  //not working
                 cppFlags "-std=c++11","-frtti", "-fexceptions"
-                arguments  '-DANDROID_STL=gnustl_static'
-//                arguments '-DANDROID_TOOLCHAIN=clang'
+                abiFilters "armeabi-v7a"
             }
         }
 
@@ -30,8 +39,11 @@ android {
     }
 
     externalNativeBuild {
-        cmake {
-            path "src/main/cpp/CMakeLists.txt"
+//        cmake {
+//            path "src/main/cpp/CMakeLists.txt"
+//        }
+        ndkBuild{
+            path "src/main/cpp/Android.mk"
         }
     }
 

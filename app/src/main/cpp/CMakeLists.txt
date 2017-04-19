@@ -4,6 +4,8 @@ set(CMAKE_VERBOSE_MAKEFILE on)
 set(libs "${CMAKE_SOURCE_DIR}/../../../sdk/native/libs")
 include_directories(${CMAKE_SOURCE_DIR}/../../../sdk/native/jni/include)
 include_directories(${CMAKE_SOURCE_DIR}/CMT)
+include_directories(${CMAKE_SOURCE_DIR}/FFmpeg/include)
+set(ffmpeg_libs "${CMAKE_SOURCE_DIR}/FFmpeg/lib")
 
 add_library(libopencv_calib3d STATIC IMPORTED )
 set_target_properties(libopencv_calib3d PROPERTIES
@@ -77,9 +79,30 @@ add_library(libopencv_java3 SHARED IMPORTED )
 set_target_properties(libopencv_java3 PROPERTIES
     IMPORTED_LOCATION "${libs}/${ANDROID_ABI}/libopencv_java3.so")
 
-add_library(libopencv_java SHARED IMPORTED )
-set_target_properties(libopencv_java PROPERTIES
-    IMPORTED_LOCATION "${libs}/${ANDROID_ABI}/libopencv_java.so")
+add_library(libavcodec STATIC IMPORTED )
+set_target_properties(libavcodec PROPERTIES
+    IMPORTED_LOCATION "${ffmpeg_libs}/${ANDROID_ABI}/libavcodec.a")
+
+add_library(libavfilter STATIC IMPORTED )
+set_target_properties(libavfilter PROPERTIES
+    IMPORTED_LOCATION "${ffmpeg_libs}/${ANDROID_ABI}/libavfilter.a")
+
+add_library(libavformat STATIC IMPORTED )
+set_target_properties(libavformat PROPERTIES
+    IMPORTED_LOCATION "${ffmpeg_libs}/${ANDROID_ABI}/libavformat.a")
+
+add_library(libavutil STATIC IMPORTED )
+set_target_properties(libavutil PROPERTIES
+    IMPORTED_LOCATION "${ffmpeg_libs}/${ANDROID_ABI}/libavutil.a")
+
+add_library(libswresample STATIC IMPORTED )
+set_target_properties(libswresample PROPERTIES
+    IMPORTED_LOCATION "${ffmpeg_libs}/${ANDROID_ABI}/libswresample.a")
+
+add_library(libswscale STATIC IMPORTED )
+set_target_properties(libswscale PROPERTIES
+    IMPORTED_LOCATION "${ffmpeg_libs}/${ANDROID_ABI}/libswscale.a")
+
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11 -fexceptions -frtti")
 
@@ -106,16 +129,26 @@ add_library( # Sets the name of the library.
              CMT/Tracker.cpp
  )
 
+
+ add_library(nativemedia
+            SHARED
+            MediaCodec.cpp)
+
+
 find_library( # Sets the name of the path variable.
               log-lib
 
-              # Specifies the name of the NDK library that
+              # Specifies tbhe name of the NDK library that
               # you want CMake to locate.
               log)
 
-target_link_libraries(mgtracker android log libopencv_java3
-    ${log-lib}
+target_link_libraries(nativemedia android ${log-lib} libavutil libswresample
+    libswscale libavcodec libavformat)
+
+target_link_libraries(mgtracker android ${log-lib} libopencv_java3
     )
+
+
 
 
 
