@@ -75,7 +75,7 @@ else
 endif
 
 LOCAL_MODULE     := mgtracker
-LOCAL_SRC_FILES  := jni_part.cpp LibCMT.cpp\
+LOCAL_SRC_FILES  := MGTracker.cpp LibCMT.cpp\
 CMT/common_cmt.cpp CMT/Consensus.cpp CMT/fastcluster.cpp CMT/Fusion.cpp CMT/Matcher.cpp CMT/MGCMT.cpp CMT/MGLearnT.cpp CMT/MGPerformanceAdapter.cpp CMT/MGPredictor.cpp CMT/Tracker.cpp
 
 # LOCAL_C_INCLUDES += $(LOCAL_PATH)
