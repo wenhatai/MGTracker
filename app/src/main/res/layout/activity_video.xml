@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#333333"
+                android:orientation="vertical">
+    <EditText
+        android:id="@+id/video_filepath"
+        android:layout_width="match_parent"
+        android:hint="视频文件地址"
+        android:layout_margin="10dp"
+        android:visibility="gone"
+        android:layout_height="wrap_content"/>
+    <android.opengl.GLSurfaceView
+        android:layout_below="@id/video_filepath"
+        android:id="@+id/video_surfaceview"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"/>
+    <com.melonteam.mgtracker.DrawView
+        android:layout_below="@id/video_filepath"
+        android:id="@+id/video_drawview"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"/>
+
+
+    <Button
+        android:id="@+id/video_play"
+        android:layout_width="60dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginBottom="10dp"
+        android:background="#33dddddd"
+        android:textColor="@android:color/white"
+        android:layout_height="40dp"
+        android:text="播放"/>
+    <Button
+        android:textColor="@android:color/white"
+        android:id="@+id/video_restart"
+        android:background="#33dddddd"
+        android:layout_marginLeft="100dp"
+        android:layout_marginBottom="10dp"
+        android:layout_alignParentBottom="true"
+        android:layout_width="60dp"
+        android:layout_height="40dp"
+        android:text="重放"/>
+
+    <TextView
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:textColor="@android:color/white"
+        android:layout_marginBottom="10dp"
+        android:id="@+id/video_infoview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/video_play"
+        />
+</RelativeLayout>
