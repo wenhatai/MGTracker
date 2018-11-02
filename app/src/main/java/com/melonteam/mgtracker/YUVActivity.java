@@ -110,21 +110,18 @@ public class YUVActivity extends Activity {
                 "void main (void){                                  \n" +
                 "   float r, g, b, y, u, v;                         \n" +
 
-//                "   y = texture2D(y_texture, v_texCoord).r;         \n" +
-//
-//                "   u = texture2D(u_texture, v_texCoord).r;  \n" +
-//                "   v = texture2D(v_texture, v_texCoord).r;  " +
+                "   y = texture2D(y_texture, v_texCoord).r;         \n" +
 
-//                "r = 1.164*(y-0.0625)+1.596*(v-0.5);" +
-//                "g = 1.164*(y-0.0625)-0.813*(v-0.5)-0.391*(u-0.5);" +
-//                "b = 1.164*(y-0.0625)+2.018*(u-0.5);"+
+                "   u = texture2D(u_texture, v_texCoord).r - 0.5;  \n" +
+                "   v = texture2D(v_texture, v_texCoord).r - 0.5;  \n" +
+
+                "r = 1.164*(y-0.0625)+1.596*v; \n" +
+                "g = 1.164*(y-0.0625)-0.813*v-0.391*u;  \n" +
+                "b = 1.164*(y-0.0625)+2.018*u;  \n"+
 
 //                "   r = y + 1.13983*v;                              \n" +
 //                "   g = y - 0.39465*u - 0.58060*v;                  \n" +
 //                "   b = y + 2.03211*u;                              \n" +
-                "r = texture2D(rgb_texture, v_texCoord).r;\n"+
-                "g = texture2D(rgb_texture, v_texCoord).g;\n"+
-                "b = texture2D(rgb_texture, v_texCoord).b;\n"+
                 "   gl_FragColor = vec4(r, g, b, 1.0);              \n" +
                 "}                                                  \n";
         private static final float[] VERTEX = {   // in counterclockwise order:
@@ -161,7 +158,8 @@ public class YUVActivity extends Activity {
         protected int mCameraWidth;
         protected int mCameraHeight;
 
-        private static byte[] image;
+        private static byte[] image1;
+        private static byte[] image2;
 
         private Camera camera; //The camera object
 
@@ -220,12 +218,14 @@ public class YUVActivity extends Activity {
                     params.setPreviewFormat(ImageFormat.YV12);
                     camera.setParameters(params);
 
-                    image = new byte[mCameraHeight * mCameraWidth / 8 * 12];
+                    image1 = new byte[mCameraHeight * mCameraWidth *3 / 2];
+                    image2 = new byte[mCameraHeight * mCameraWidth *3 / 2];
                     yBuffer = ByteBuffer.allocate(mCameraWidth * mCameraHeight).order(ByteOrder.nativeOrder());
                     uBuffer = ByteBuffer.allocate(mCameraWidth * mCameraHeight /4).order(ByteOrder.nativeOrder());
                     vBuffer = ByteBuffer.allocate(mCameraWidth*mCameraHeight/4).order(ByteOrder.nativeOrder());
 
-                    camera.addCallbackBuffer(image);
+                    camera.addCallbackBuffer(image1);
+                    camera.addCallbackBuffer(image2);
                     camera.setPreviewCallbackWithBuffer(MyRenderer.this);
 
                     initView();
@@ -343,7 +343,7 @@ public class YUVActivity extends Activity {
             GLES20.glActiveTexture(GLES20.GL_TEXTURE1);
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, vTextureNames[0]);
             GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_LUMINANCE, mCameraWidth / 2, mCameraHeight / 2,
-                    0, GLES20.GL_LUMINANCE, GLES20.GL_LUMINANCE, vBuffer);
+                    0, GLES20.GL_LUMINANCE, GLES20.GL_UNSIGNED_BYTE, vBuffer);
             GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER,
                     GLES20.GL_LINEAR);
             GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER,
@@ -357,7 +357,7 @@ public class YUVActivity extends Activity {
             GLES20.glActiveTexture(GLES20.GL_TEXTURE2);
             GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, uTextureNames[0]);
             GLES20.glTexImage2D(GLES20.GL_TEXTURE_2D, 0, GLES20.GL_LUMINANCE, mCameraWidth / 2, mCameraHeight / 2,
-                    0, GLES20.GL_LUMINANCE, GLES20.GL_LUMINANCE, uBuffer);
+                    0, GLES20.GL_LUMINANCE, GLES20.GL_UNSIGNED_BYTE, uBuffer);
             GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER,
                     GLES20.GL_LINEAR);
             GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER,
@@ -394,6 +394,9 @@ public class YUVActivity extends Activity {
 
         @Override
         public void onPreviewFrame(byte[] data, Camera camera) {
+            if(data == null){
+                return;
+            }
             yBuffer.put(data, 0, mCameraWidth * mCameraHeight).position(0);
             vBuffer.put(data, mCameraWidth * mCameraHeight, mCameraWidth * mCameraHeight / 4).position(0);
             uBuffer.put(data, mCameraWidth * mCameraHeight*5/4, mCameraWidth * mCameraHeight / 4).position(0);
